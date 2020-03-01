@@ -1,0 +1,15 @@
+mock:
+    path: ./src/main/resources/data/
+
+# SWAGGER
+swagger:
+   title: Internship Browser API
+   description: API for the internships, profiles, and student association
+   version: 1.0.0
+   license: Apache License, Version 2.0
+   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
+   contact:
+      name: Smart Community Lab
+      url: www.smartcommunitylab.it
+      email: info@smartcommunitylab.it
+

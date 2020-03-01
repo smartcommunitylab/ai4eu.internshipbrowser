@@ -1,0 +1,97 @@
+/*******************************************************************************
+ * Copyright 2015 Fondazione Bruno Kessler
+ * 
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ ******************************************************************************/
+package eu.ai4eu.ai4citizen.internshipbrowser.rest;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityAssignment;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityClustering;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentActivityPreference;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
+import eu.ai4eu.ai4citizen.internshipbrowser.service.BrowserMockService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+/**
+ * Internshp Browser controller
+ * @author raman
+ *
+ */
+@Controller
+@Api(tags = { "Internship Browser API" })
+public class BrowserController {
+
+	@Autowired
+	private BrowserMockService service;
+	
+	@GetMapping("/api/profile/{studentId:.*}")
+	@ApiOperation(value="Get student profile")
+	public ResponseEntity<StudentProfile> getProfile(String studentId) {
+		return ResponseEntity.ok(service.getProfile(studentId));
+	}
+
+	@GetMapping("/api/activities/{studentId}/{activityType}/{registationYear}")
+	@ApiOperation(value="Get activities matching student profile")
+	public ResponseEntity<ActivityClustering> getMatchingActivities(String studentId, String registrationYear, String activityType) {
+		return ResponseEntity.ok(service.getMatchingActivities(studentId, registrationYear, activityType));
+	}
+
+	@GetMapping("/api/activities/{activityId}")
+	@ApiOperation(value="Get activity details")
+	public ResponseEntity<Activity> getActivityDetails(String activityId) {
+		return ResponseEntity.ok(service.getActivity(activityId));
+	}
+
+	@GetMapping("/api/plan/{planId:.*}")
+	@ApiOperation(value="Get study plan")
+	public ResponseEntity<StudyPlan> getStudyPlan(String planId) {
+		return ResponseEntity.ok(service.getStudyPlan(planId));
+	}
+	
+	@GetMapping("/api/activityassignment/{activityId:.*}")
+	@ApiOperation(value="Get activity assignment")
+	public ResponseEntity<ActivityAssignment> getActivityAssignment(String activityId) {
+		return ResponseEntity.ok(service.getActivityAssignment(activityId));
+	}
+
+	@GetMapping("/api/preferences/{studentId}/{activityType}/{registationYear}")
+	@ApiOperation(value="Get student activity preferences")
+	public ResponseEntity<StudentActivityPreference> getActivityPreference(String studentId, String registrationYear, String activityType) {
+		return ResponseEntity.ok(service.getActivityPreference(studentId, registrationYear, activityType));
+	}
+	
+	@PostMapping("/api/preferences/{studentId}/{activityType}/{registationYear}/student")
+	@ApiOperation(value="Update student activity preferences")
+	public ResponseEntity<StudentActivityPreference> saveActivityPreference(String studentId, String registrationYear, String activityType, Map<String, Integer> preferences) {
+		return ResponseEntity.ok(service.saveActivityPreference(studentId, registrationYear, activityType, preferences));
+	}
+
+	@PostMapping("/api/preferences/{studentId}/{activityType}/{registationYear}/teacher")
+	@ApiOperation(value="Update teacher view of student activity preferences")
+	public ResponseEntity<StudentActivityPreference> saveActivityTeacherPreference(String studentId, String registrationYear, String activityType, Map<String, Integer> preferences) {
+		// TODO
+		return ResponseEntity.ok(service.saveActivityTeacherPreference(studentId, registrationYear, activityType, preferences));
+	}
+
+}
