@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>eu.ai4eu.ai4citizen</groupId>
-	<artifactId>internship-browser</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>internshipbrowser</artifactId>
+	<version>0.1</version>
 	<name>internship-browser</name>
 	<description>AI4EU-T6.2 - Internship Browser Component</description>
 
