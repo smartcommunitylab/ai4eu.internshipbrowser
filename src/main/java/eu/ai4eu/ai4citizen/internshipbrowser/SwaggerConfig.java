@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +43,9 @@ public class SwaggerConfig {
 	@Autowired
 	private SwaggerConf conf;
 
+	@Value("${basepath}")
+	private String host;
+	
 	@Bean
 	@ConfigurationProperties("swagger")
 	public SwaggerConf getConf(){
@@ -50,11 +54,13 @@ public class SwaggerConfig {
 
 	@Bean
 	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("Internship Browser")
+		Docket docket = new Docket(DocumentationType.SWAGGER_2).groupName("Internship Browser")
 				.apiInfo(apiInfo())
 				.select()
 					.apis(RequestHandlerSelectors.basePackage("eu.ai4eu.ai4citizen"))
 					.paths(PathSelectors.regex("/.*")).build();
+		docket.host(host);
+		return docket;
 	}
 
 	public ApiInfo apiInfo() {

@@ -1,6 +1,8 @@
 mock:
     path: ./src/main/resources/data/
 
+basepath: ai4eu.smartcommunitylab.it
+
 # SWAGGER
 swagger:
    title: Internship Browser API

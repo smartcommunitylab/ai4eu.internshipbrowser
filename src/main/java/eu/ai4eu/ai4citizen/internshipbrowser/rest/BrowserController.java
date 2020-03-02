@@ -21,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityAssignment;
@@ -47,50 +49,49 @@ public class BrowserController {
 	
 	@GetMapping("/api/profile/{studentId:.*}")
 	@ApiOperation(value="Get student profile")
-	public ResponseEntity<StudentProfile> getProfile(String studentId) {
+	public ResponseEntity<StudentProfile> getProfile(@PathVariable String studentId) {
 		return ResponseEntity.ok(service.getProfile(studentId));
 	}
 
 	@GetMapping("/api/activities/{studentId}/{activityType}/{registationYear}")
 	@ApiOperation(value="Get activities matching student profile")
-	public ResponseEntity<ActivityClustering> getMatchingActivities(String studentId, String registrationYear, String activityType) {
+	public ResponseEntity<ActivityClustering> getMatchingActivities(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType) {
 		return ResponseEntity.ok(service.getMatchingActivities(studentId, registrationYear, activityType));
 	}
 
 	@GetMapping("/api/activities/{activityId}")
 	@ApiOperation(value="Get activity details")
-	public ResponseEntity<Activity> getActivityDetails(String activityId) {
+	public ResponseEntity<Activity> getActivityDetails(@PathVariable String activityId) {
 		return ResponseEntity.ok(service.getActivity(activityId));
 	}
 
 	@GetMapping("/api/plan/{planId:.*}")
 	@ApiOperation(value="Get study plan")
-	public ResponseEntity<StudyPlan> getStudyPlan(String planId) {
+	public ResponseEntity<StudyPlan> getStudyPlan(@PathVariable String planId) {
 		return ResponseEntity.ok(service.getStudyPlan(planId));
 	}
 	
 	@GetMapping("/api/activityassignment/{activityId:.*}")
 	@ApiOperation(value="Get activity assignment")
-	public ResponseEntity<ActivityAssignment> getActivityAssignment(String activityId) {
+	public ResponseEntity<ActivityAssignment> getActivityAssignment(@PathVariable String activityId) {
 		return ResponseEntity.ok(service.getActivityAssignment(activityId));
 	}
 
 	@GetMapping("/api/preferences/{studentId}/{activityType}/{registationYear}")
 	@ApiOperation(value="Get student activity preferences")
-	public ResponseEntity<StudentActivityPreference> getActivityPreference(String studentId, String registrationYear, String activityType) {
+	public ResponseEntity<StudentActivityPreference> getActivityPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType) {
 		return ResponseEntity.ok(service.getActivityPreference(studentId, registrationYear, activityType));
 	}
 	
 	@PostMapping("/api/preferences/{studentId}/{activityType}/{registationYear}/student")
 	@ApiOperation(value="Update student activity preferences")
-	public ResponseEntity<StudentActivityPreference> saveActivityPreference(String studentId, String registrationYear, String activityType, Map<String, Integer> preferences) {
+	public ResponseEntity<StudentActivityPreference> saveActivityPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Integer> preferences) {
 		return ResponseEntity.ok(service.saveActivityPreference(studentId, registrationYear, activityType, preferences));
 	}
 
 	@PostMapping("/api/preferences/{studentId}/{activityType}/{registationYear}/teacher")
 	@ApiOperation(value="Update teacher view of student activity preferences")
-	public ResponseEntity<StudentActivityPreference> saveActivityTeacherPreference(String studentId, String registrationYear, String activityType, Map<String, Integer> preferences) {
-		// TODO
+	public ResponseEntity<StudentActivityPreference> saveActivityTeacherPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Integer> preferences) {
 		return ResponseEntity.ok(service.saveActivityTeacherPreference(studentId, registrationYear, activityType, preferences));
 	}
 
