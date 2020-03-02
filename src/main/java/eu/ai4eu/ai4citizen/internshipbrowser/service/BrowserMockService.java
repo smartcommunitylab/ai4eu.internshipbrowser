@@ -44,6 +44,7 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityTemplate;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentActivityPreference;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan.StudyActivity;
 
 /**
  * @author raman
@@ -143,7 +144,20 @@ public class BrowserMockService {
 	}
 	
 	public StudyPlan getStudyPlan(String planId) {
-		return plans.stream().filter(p -> p.getPlanId().equals(planId)).findFirst().orElse(null);
+		StudyPlan plan = plans.stream().filter(p -> p.getPlanId().equals(planId)).findFirst().orElse(null);
+		
+		if (plan != null) {
+			plan.setPlannedActivities(new LinkedList<>());
+			for (int i = 3; i <=5; i++) {
+				StudyActivity activity = new StudyActivity();
+				activity.setCompetences(plan.getCompetences());
+				activity.setRegistrationYear(i);
+				activity.setType(Activity.TYPE_INTERNSHIP);
+				plan.getPlannedActivities().add(activity);
+			}
+		}
+		
+		return plan;
 	}
 	
 	public ActivityAssignment getActivityAssignment(String activityId) {

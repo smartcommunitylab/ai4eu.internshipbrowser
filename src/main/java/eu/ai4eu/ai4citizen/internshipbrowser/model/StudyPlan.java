@@ -35,6 +35,8 @@ public class StudyPlan {
 	private String start, end;
 	
 	private List<Competence> competences;
+	
+	private List<StudyActivity> plannedActivities; 
 
 	public String getPlanId() {
 		return planId;
@@ -100,4 +102,36 @@ public class StudyPlan {
 		this.end = end;
 	}
 	
+	public List<StudyActivity> getPlannedActivities() {
+		return plannedActivities;
+	}
+
+	public void setPlannedActivities(List<StudyActivity> plannedActivities) {
+		this.plannedActivities = plannedActivities;
+	}
+	
+	public static class StudyActivity {
+		private String type;
+		private Integer registrationYear;
+		private List<Competence> competences;
+		public String getType() {
+			return type;
+		}
+		public void setType(String type) {
+			this.type = type;
+		}
+		public Integer getRegistrationYear() {
+			return registrationYear;
+		}
+		public void setRegistrationYear(Integer registrationYear) {
+			this.registrationYear = registrationYear;
+		}
+		public List<Competence> getCompetences() {
+			return competences;
+		}
+		public void setCompetences(List<Competence> competences) {
+			this.competences = competences;
+		}
+	}
+
 }
