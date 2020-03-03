@@ -53,7 +53,7 @@ public class BrowserController {
 		return ResponseEntity.ok(service.getProfile(studentId));
 	}
 
-	@GetMapping("/api/activities/{studentId}/{activityType}/{registationYear}")
+	@GetMapping("/api/activities/{studentId}/{activityType}/{registrationYear}")
 	@ApiOperation(value="Get activities matching student profile")
 	public ResponseEntity<ActivityClustering> getMatchingActivities(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType) {
 		return ResponseEntity.ok(service.getMatchingActivities(studentId, registrationYear, activityType));

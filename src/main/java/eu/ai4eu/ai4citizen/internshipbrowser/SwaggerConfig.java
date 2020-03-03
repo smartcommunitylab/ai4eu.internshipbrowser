@@ -43,7 +43,7 @@ public class SwaggerConfig {
 	@Autowired
 	private SwaggerConf conf;
 
-	@Value("${basepath}")
+	@Value("${basepath:localhost:8080}")
 	private String host;
 	
 	@Bean
