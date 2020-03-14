@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -72,6 +74,13 @@ public class BrowserMockService {
 		return profile;
 	}
 
+	public Long getMatchingActivitiesCount(String studentId, String registrationYear, String activityType) {
+		final StudentProfile profile = getProfile(studentId);
+		return activities.stream()
+		.filter(a -> !a.isInternal() && a.getInstituteId().equals(profile.getInstituteId()) /*&& a.getCourse().equals(profile.getCourse()) */&& a.getRegistrationYear().equals(profile.getRegistrationYear()))
+		.count();
+	}
+
 	public ActivityClustering getMatchingActivities(String studentId, String registrationYear, String activityType) {
 		final StudentProfile profile = getProfile(studentId);
 		List<Activity> offers = activities.stream()
@@ -81,7 +90,7 @@ public class BrowserMockService {
 		ActivityClustering clustering = new ActivityClustering();
 		clustering.setClusters(new LinkedList<>());
 		
-		// topics: course
+		// cluster: course
 		ActivityCluster topicCluster = new ActivityCluster();
 		clustering.getClusters().add(topicCluster);
 		topicCluster.setAssignments(new LinkedList<>());
@@ -94,7 +103,7 @@ public class BrowserMockService {
 			topicCluster.getAssignments().add(assignment);
 		});
 
-		// topics: course
+		// cluster: companyType
 		ActivityCluster companyCluster = new ActivityCluster();
 		clustering.getClusters().add(companyCluster);
 		companyCluster.setAssignments(new LinkedList<>());
@@ -115,7 +124,7 @@ public class BrowserMockService {
 			companyCluster.getAssignments().add(assignment);
 		});
 
-		// topics: location
+		// cluster: distance
 		ActivityCluster locationCluster = new ActivityCluster();
 		clustering.getClusters().add(locationCluster);
 		locationCluster.setType("location");
@@ -140,8 +149,26 @@ public class BrowserMockService {
 		if (!dist50.getActivities().isEmpty()) locationCluster.getAssignments().add(dist50);
 		if (!dist50p.getActivities().isEmpty()) locationCluster.getAssignments().add(dist50p);
 		
+		// cluster: city
+		ActivityCluster cityCluster = new ActivityCluster();
+		clustering.getClusters().add(cityCluster);
+		cityCluster.setType("city");
+		cityCluster.setAssignments(new LinkedList<>());
+		Map<String, List<Activity>> cityLists = offers.stream().collect(Collectors.groupingBy(a ->  extractCity(a.getAddress())));
+		cityLists.keySet().forEach(key -> {
+			if (!"-".equals(key)) {
+				ActivityClusterAssignment assignment = new ActivityClusterAssignment();
+				assignment.setKeys(Collections.singleton(key));
+				assignment.setActivities(cityLists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
+				cityCluster.getAssignments().add(assignment);
+			}
+		});
+
+		
 		return clustering;
 	}
+	
+	
 	
 	public StudyPlan getStudyPlan(String planId) {
 		StudyPlan plan = plans.stream().filter(p -> p.getPlanId().equals(planId)).findFirst().orElse(null);
@@ -232,6 +259,17 @@ public class BrowserMockService {
 		return offer;
 	}
 	
+	/**
+	 * @param address
+	 * @return
+	 */
+	private static String extractCity(String address) {
+		if (address == null) return null;
+		Pattern pattern = Pattern.compile(".* \\d{5} ([A-Za-z \\-']+)( \\(\\w+\\))?");
+        Matcher matcher = pattern.matcher(address);
+		return matcher.find() ? matcher.group(1).trim().toUpperCase() : "-";
+	}
+
 	private double distance(double lat1, double lon1, double lat2, double lon2) {
 		lat1 = Math.toRadians(lat1);
 		lon1 = Math.toRadians(lon1);

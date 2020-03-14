@@ -59,6 +59,12 @@ public class BrowserController {
 		return ResponseEntity.ok(service.getMatchingActivities(studentId, registrationYear, activityType));
 	}
 
+	@GetMapping("/api/activities/{studentId}/{activityType}/{registrationYear}/count")
+	@ApiOperation(value="Get number of activities matching student profile")
+	public ResponseEntity<Long> getMatchingActivitiesCount(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType) {
+		return ResponseEntity.ok(service.getMatchingActivitiesCount(studentId, registrationYear, activityType));
+	}
+
 	@GetMapping("/api/activities/{activityId}")
 	@ApiOperation(value="Get activity details")
 	public ResponseEntity<Activity> getActivityDetails(@PathVariable String activityId) {
@@ -77,19 +83,19 @@ public class BrowserController {
 		return ResponseEntity.ok(service.getActivityAssignment(activityId));
 	}
 
-	@GetMapping("/api/preferences/{studentId}/{activityType}/{registationYear}")
+	@GetMapping("/api/preferences/{studentId}/{activityType}/{registrationYear}")
 	@ApiOperation(value="Get student activity preferences")
 	public ResponseEntity<StudentActivityPreference> getActivityPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType) {
 		return ResponseEntity.ok(service.getActivityPreference(studentId, registrationYear, activityType));
 	}
 	
-	@PostMapping("/api/preferences/{studentId}/{activityType}/{registationYear}/student")
+	@PostMapping("/api/preferences/{studentId}/{activityType}/{registrationYear}/student")
 	@ApiOperation(value="Update student activity preferences")
 	public ResponseEntity<StudentActivityPreference> saveActivityPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Integer> preferences) {
 		return ResponseEntity.ok(service.saveActivityPreference(studentId, registrationYear, activityType, preferences));
 	}
 
-	@PostMapping("/api/preferences/{studentId}/{activityType}/{registationYear}/teacher")
+	@PostMapping("/api/preferences/{studentId}/{activityType}/{registrationYear}/teacher")
 	@ApiOperation(value="Update teacher view of student activity preferences")
 	public ResponseEntity<StudentActivityPreference> saveActivityTeacherPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Integer> preferences) {
 		return ResponseEntity.ok(service.saveActivityTeacherPreference(studentId, registrationYear, activityType, preferences));
