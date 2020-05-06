@@ -17,8 +17,8 @@ package eu.ai4eu.ai4citizen.internshipbrowser.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import eu.ai4eu.ai4citizen.internshipbrowser.service.DataInitializer;
 import eu.ai4eu.ai4citizen.internshipbrowser.service.GroupBuilderService;
@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
  * @author raman
  *
  */
-@Controller
+@RestController
 @Api(tags = { "Internship Browser Admin API" })
 public class AdminController {
 
