@@ -15,8 +15,6 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.service;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,11 +28,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 
 import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityAssignment;
@@ -42,47 +41,59 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityClustering;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityClustering.ActivityCluster;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityClustering.ActivityClusterAssignment;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityTemplate;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityTemplate.CLUSTER;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentActivityPreference;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan.StudyActivity;
+import eu.ai4eu.ai4citizen.internshipbrowser.repository.AssignmentRepository;
+import eu.ai4eu.ai4citizen.internshipbrowser.repository.OfferRepository;
+import eu.ai4eu.ai4citizen.internshipbrowser.repository.PlanRepository;
+import eu.ai4eu.ai4citizen.internshipbrowser.repository.PreferenceRepository;
+import eu.ai4eu.ai4citizen.internshipbrowser.repository.StudentProfileRepository;
 
 /**
  * @author raman
  *
  */
-//@Service
-public class BrowserMockService {
+@Service
+public class BrowserService {
 
 	@Value("${mock.path:./src/main/resources/data}")
 	private String path;
 	
-	private StudentProfile profile;
-	private List<StudyPlan> plans;
-	private List<Activity> activities;
-	
-	@PostConstruct
-	public void initData() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		profile = mapper.readValue(Files.readAllBytes(Paths.get(path+"/profile.json")), StudentProfile.class);
-		plans = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/plans.json")), StudyPlan[].class));
-		activities = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/activities.json")), Activity[].class));
-	}
+	@Autowired
+	private PlanRepository planRepo;
+	@Autowired
+	private StudentProfileRepository profileRepo;
+	@Autowired
+	private OfferRepository offerRepo;
+	@Autowired
+	private PreferenceRepository prefRepo;
+	@Autowired
+	private AssignmentRepository assignmentRepo;
 	
 	public StudentProfile getProfile(String studentId) {
-		return profile;
+		return profileRepo.findById(studentId).orElse(null);
 	}
 
 	public Long getMatchingActivitiesCount(String studentId, String registrationYear, String activityType) {
 		final StudentProfile profile = getProfile(studentId);
-		return activities.stream()
+		return getAllActivities().stream()
 		.filter(a -> !a.isInternal() && a.getInstituteId().equals(profile.getInstituteId()) /*&& a.getCourse().equals(profile.getCourse()) */&& a.getRegistrationYear().equals(profile.getRegistrationYear()))
 		.count();
 	}
 
+	/**
+	 * @return
+	 */
+	private List<Activity> getAllActivities() {
+		return offerRepo.findAll();
+	}
+
 	public ActivityClustering getMatchingActivities(String studentId, String registrationYear, String activityType) {
 		final StudentProfile profile = getProfile(studentId);
-		List<Activity> offers = activities.stream()
+		List<Activity> offers = getAllActivities().stream()
 		.filter(a -> !a.isInternal() && a.getInstituteId().equals(profile.getInstituteId()) /*&& a.getCourse().equals(profile.getCourse()) */&& a.getRegistrationYear().equals(profile.getRegistrationYear()))
 		.collect(Collectors.toList());
 		
@@ -90,42 +101,43 @@ public class BrowserMockService {
 		clustering.setClusters(new LinkedList<>());
 		
 		// cluster: course
-		ActivityCluster topicCluster = new ActivityCluster();
+		ActivityCluster topicCluster = extractTopics(offers);
 		clustering.getClusters().add(topicCluster);
-		topicCluster.setAssignments(new LinkedList<>());
-		topicCluster.setType("topic");
-		Map<String, List<Activity>> lists = offers.stream().collect(Collectors.groupingBy(a -> a.getCourse()));
-		lists.keySet().forEach(key -> {
-			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
-			assignment.setKeys(Collections.singleton(key));
-			assignment.setActivities(lists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
-			topicCluster.getAssignments().add(assignment);
-		});
 
 		// cluster: companyType
-		ActivityCluster companyCluster = new ActivityCluster();
+		ActivityCluster companyCluster = extractCompanyTypes(offers);
 		clustering.getClusters().add(companyCluster);
-		companyCluster.setAssignments(new LinkedList<>());
-		companyCluster.setType("company");
-		Set<String> privateBodies = new HashSet<>(Arrays.asList("s.r.l", " srl", " snc", "s.p.a", " spa", "responsabilit", " sas", "s.n.c", "studio"));
-		Set<String> publicBodies = new HashSet<>(Arrays.asList("universit", "vigil", "fondazione", "istituto", "comune "));
-		
-		Map<String, List<Activity>> companyLists = offers.stream().collect(Collectors.groupingBy(a -> {
-			String company = a.getCompany().toLowerCase();
-			if (privateBodies.stream().anyMatch(b -> company.contains(b))) return "private";
-			if (publicBodies.stream().anyMatch(b -> company.contains(b))) return "public";
-			return "other";
-		}));
-		companyLists.keySet().forEach(key -> {
-			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
-			assignment.setKeys(Collections.singleton(key));
-			assignment.setActivities(companyLists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
-			companyCluster.getAssignments().add(assignment);
-		});
 
 		// cluster: distance
-		ActivityCluster locationCluster = new ActivityCluster();
+		ActivityCluster locationCluster = extractDistances(profile, offers);
 		clustering.getClusters().add(locationCluster);
+
+		// cluster: city
+		ActivityCluster cityCluster = extractCities(offers);
+		clustering.getClusters().add(cityCluster);
+
+		
+		return clustering;
+	}
+
+	private ActivityCluster extractCities(List<Activity> offers) {
+		ActivityCluster cityCluster = new ActivityCluster();
+		cityCluster.setType("city");
+		cityCluster.setAssignments(new LinkedList<>());
+		Map<String, List<Activity>> cityLists = offers.stream().collect(Collectors.groupingBy(a ->  extractCity(a.getAddress())));
+		cityLists.keySet().forEach(key -> {
+			if (!"-".equals(key)) {
+				ActivityClusterAssignment assignment = new ActivityClusterAssignment();
+				assignment.setKeys(Collections.singleton(key));
+				assignment.setActivities(cityLists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
+				cityCluster.getAssignments().add(assignment);
+			}
+		});
+		return cityCluster;
+	}
+
+	private ActivityCluster extractDistances(final StudentProfile profile, List<Activity> offers) {
+		ActivityCluster locationCluster = new ActivityCluster();
 		locationCluster.setType("location");
 		locationCluster.setAssignments(new LinkedList<>());
 		ActivityClusterAssignment dist5 = new ActivityClusterAssignment();
@@ -147,30 +159,49 @@ public class BrowserMockService {
 		if (!dist10.getActivities().isEmpty()) locationCluster.getAssignments().add(dist10);
 		if (!dist50.getActivities().isEmpty()) locationCluster.getAssignments().add(dist50);
 		if (!dist50p.getActivities().isEmpty()) locationCluster.getAssignments().add(dist50p);
-		
-		// cluster: city
-		ActivityCluster cityCluster = new ActivityCluster();
-		clustering.getClusters().add(cityCluster);
-		cityCluster.setType("city");
-		cityCluster.setAssignments(new LinkedList<>());
-		Map<String, List<Activity>> cityLists = offers.stream().collect(Collectors.groupingBy(a ->  extractCity(a.getAddress())));
-		cityLists.keySet().forEach(key -> {
-			if (!"-".equals(key)) {
-				ActivityClusterAssignment assignment = new ActivityClusterAssignment();
-				assignment.setKeys(Collections.singleton(key));
-				assignment.setActivities(cityLists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
-				cityCluster.getAssignments().add(assignment);
-			}
-		});
+		return locationCluster;
+	}
 
+	private ActivityCluster extractCompanyTypes(List<Activity> offers) {
+		ActivityCluster companyCluster = new ActivityCluster();
+		companyCluster.setAssignments(new LinkedList<>());
+		companyCluster.setType("company");
+		Set<String> privateBodies = new HashSet<>(Arrays.asList("s.r.l", " srl", " snc", "s.p.a", " spa", "responsabilit", " sas", "s.n.c", "studio"));
+		Set<String> publicBodies = new HashSet<>(Arrays.asList("universit", "vigil", "fondazione", "istituto", "comune "));
 		
-		return clustering;
+		Map<String, List<Activity>> companyLists = offers.stream().collect(Collectors.groupingBy(a -> {
+			String company = a.getCompany().toLowerCase();
+			if (privateBodies.stream().anyMatch(b -> company.contains(b))) return "private";
+			if (publicBodies.stream().anyMatch(b -> company.contains(b))) return "public";
+			return "other";
+		}));
+		companyLists.keySet().forEach(key -> {
+			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
+			assignment.setKeys(Collections.singleton(key));
+			assignment.setActivities(companyLists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
+			companyCluster.getAssignments().add(assignment);
+		});
+		return companyCluster;
+	}
+
+	private ActivityCluster extractTopics(List<Activity> offers) {
+		ActivityCluster topicCluster = new ActivityCluster();
+		topicCluster.setAssignments(new LinkedList<>());
+		topicCluster.setType("topic");
+		Map<String, List<Activity>> lists = offers.stream().collect(Collectors.groupingBy(a -> a.getCourse()));
+		lists.keySet().forEach(key -> {
+			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
+			assignment.setKeys(Collections.singleton(key));
+			assignment.setActivities(lists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
+			topicCluster.getAssignments().add(assignment);
+		});
+		return topicCluster;
 	}
 	
 	
 	
 	public StudyPlan getStudyPlan(String planId) {
-		StudyPlan plan = plans.stream().filter(p -> p.getPlanId().equals(planId)).findFirst().orElse(null);
+		StudyPlan plan = planRepo.findById(planId).orElse(null);
 		
 		if (plan != null) {
 			plan.setPlannedActivities(new LinkedList<>());
@@ -187,10 +218,13 @@ public class BrowserMockService {
 	}
 	
 	public ActivityAssignment getActivityAssignment(String activityId) {
+		ActivityAssignment stored = assignmentRepo.findById(activityId).orElse(null);
+		if (stored != null) return stored;
+		
 		ActivityAssignment assignment = new ActivityAssignment();
 		assignment.setActivityId(activityId);
 		assignment.setStatus(ActivityAssignment.STATUS_PENDING);
-		Activity activity = activities.stream().filter(a -> a.getActivityId().equals(activityId)).findFirst().orElse(null);
+		Activity activity = offerRepo.findById(activityId).orElse(null);
 		if (activity == null) return null;
 		assignment.setTeamSize(activity.getTeamSize());
 		assignment.setUpdated(LocalDateTime.now());
@@ -198,6 +232,9 @@ public class BrowserMockService {
 	}
 
 	public StudentActivityPreference getActivityPreference(String studentId, String registrationYear, String activityType) {
+		StudentActivityPreference stored = prefRepo.findByStudentIdAndRegistrationYearAndActivityType(studentId, Integer.parseInt(registrationYear), ActivityTemplate.TYPE_INTERNSHIP);
+		if (stored != null) return stored;
+		
 		StudentActivityPreference pref = new StudentActivityPreference();
 		pref.setStudentId(studentId);
 		ActivityTemplate template = new ActivityTemplate();
@@ -217,18 +254,22 @@ public class BrowserMockService {
 	public StudentActivityPreference saveActivityPreference(String studentId, String registrationYear, String activityType, Map<String, Integer> preferences) {
 		StudentActivityPreference pref = getActivityPreference(studentId, registrationYear, activityType);
 		pref.setPreferences(preferences);
+		prefRepo.save(pref);
+		
 		return pref;
 	}
 
 	public StudentActivityPreference saveActivityTeacherPreference(String studentId, String registrationYear, String activityType, Map<String, Integer> preferences) {
 		StudentActivityPreference pref = getActivityPreference(studentId, registrationYear, activityType);
 		pref.setTeacherPreferences(preferences);
+		prefRepo.save(pref);
+		
 		return pref;
 	}
 
 
 	public Activity getActivity(String activityId) {
-		Optional<Activity> activity = activities.stream().filter(a-> a.getActivityId().equals(activityId)).findFirst();
+		Optional<Activity> activity = offerRepo.findById(activityId);
 		if (activity.isPresent()) return toOffer(activity.get());
 		return null;
 	}
@@ -264,7 +305,7 @@ public class BrowserMockService {
 	 */
 	private static String extractCity(String address) {
 		if (address == null) return null;
-		Pattern pattern = Pattern.compile(".* \\d{5} ([A-Za-z \\-']+)( \\(\\w+\\))?");
+		Pattern pattern = Pattern.compile(".* \\d{5}[ \\-]+([A-Za-z \\-']+)( \\(\\w+\\))?");
         Matcher matcher = pattern.matcher(address);
 		return matcher.find() ? matcher.group(1).trim().toUpperCase() : "-";
 	}
@@ -283,6 +324,21 @@ public class BrowserMockService {
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
 		return 6371 * c;
+	}
+
+	/**
+	 * @param cluster
+	 * @return
+	 */
+	public Set<String> getVocabulary(CLUSTER cluster) {
+		switch (cluster) {
+		case city: return extractCities(getAllActivities()).getAssignments().stream().flatMap(ac -> ac.getKeys().stream()).collect(Collectors.toSet());
+		case company: return extractCompanyTypes(getAllActivities()).getAssignments().stream().flatMap(ac -> ac.getKeys().stream()).collect(Collectors.toSet());
+		case topic: return extractTopics(getAllActivities()).getAssignments().stream().flatMap(ac -> ac.getKeys().stream()).collect(Collectors.toSet());
+		case company_name: return getAllActivities().stream().filter(a -> !a.isInternal() && !StringUtils.isEmpty(a.getCompany())).map(a -> a.getCompany()).collect(Collectors.toSet());
+		case location: 
+		default: return Collections.emptySet();
+		}
 	}
 	
 }

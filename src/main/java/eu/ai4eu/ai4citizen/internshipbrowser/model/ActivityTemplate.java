@@ -25,6 +25,8 @@ public class ActivityTemplate {
 
 	public static final String TYPE_INTERNSHIP = "internship";
 	
+	public enum CLUSTER {topic, company, company_name, location, city};
+	
 	private String type;
 	private boolean internal;
 	private String course, planTitle, planId, courseYear, institute, instituteId;

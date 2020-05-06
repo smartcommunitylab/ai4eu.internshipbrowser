@@ -15,6 +15,7 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.model;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -125,6 +126,7 @@ public class StudentProfile {
 		this.registrationYear = registrationYear;
 	}
 	public List<Competence> getCompetences() {
+		if (competences == null) competences = new LinkedList<>();
 		return competences;
 	}
 	public void setCompetences(List<Competence> competences) {
@@ -153,6 +155,12 @@ public class StudentProfile {
 	}
 	public void setCourseClass(String courseClass) {
 		this.courseClass = courseClass;
+	}
+	/**
+	 * @return
+	 */
+	public String fullName() {
+		return surname +" " + name;
 	}
 	
 }

@@ -16,6 +16,7 @@
 package eu.ai4eu.ai4citizen.internshipbrowser.rest;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,10 +29,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityAssignment;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityClustering;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityTemplate.CLUSTER;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentActivityPreference;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
-import eu.ai4eu.ai4citizen.internshipbrowser.service.BrowserMockService;
+import eu.ai4eu.ai4citizen.internshipbrowser.service.BrowserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -45,7 +47,7 @@ import io.swagger.annotations.ApiOperation;
 public class BrowserController {
 
 	@Autowired
-	private BrowserMockService service;
+	private BrowserService service;
 	
 	@GetMapping("/api/profile/{studentId:.*}")
 	@ApiOperation(value="Get student profile")
@@ -65,6 +67,12 @@ public class BrowserController {
 		return ResponseEntity.ok(service.getMatchingActivitiesCount(studentId, registrationYear, activityType));
 	}
 
+	@GetMapping("/api/activities/vocabulary/{cluster}")
+	@ApiOperation(value="Get list of terms for the specified cluster")
+	public ResponseEntity<Set<String>> getVocabulary(@PathVariable CLUSTER cluster) {
+		return ResponseEntity.ok(service.getVocabulary(cluster));
+	}
+	
 	@GetMapping("/api/activities/{activityId}")
 	@ApiOperation(value="Get activity details")
 	public ResponseEntity<Activity> getActivityDetails(@PathVariable String activityId) {

@@ -3,6 +3,15 @@ mock:
 
 basepath: ai4eu.smartcommunitylab.it
 
+groupbuilder:
+    endpoint: https://www.eduteams.iiia.csic.es/AI4EU/GroupBuilder
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: internshipbrowser
+
 # SWAGGER
 swagger:
    title: Internship Browser API

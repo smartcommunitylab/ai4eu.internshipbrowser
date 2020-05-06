@@ -17,12 +17,17 @@ package eu.ai4eu.ai4citizen.internshipbrowser.model;
 
 import java.util.Map;
 
+import org.springframework.data.annotation.Id;
+
 /**
  * @author raman
  *
  */
 public class StudentActivityPreference {
 
+	@Id
+	private String id;
+	
 	private String studentId;
 	private ActivityTemplate template;
 	private Map<String, Integer> preferences;
@@ -51,6 +56,12 @@ public class StudentActivityPreference {
 	}
 	public void setTeacherPreferences(Map<String, Integer> teacherPreferences) {
 		this.teacherPreferences = teacherPreferences;
+	}
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
 	}
 	
 }
