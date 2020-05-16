@@ -153,7 +153,7 @@ public class GroupBuilderService {
 			Activity a = offerRepo.findById(key).orElse(null);
 			if (a != null) {
 				Preference pref = new Preference();
-				pref.setPreference_value(p.getPreferences().get(key));
+				pref.setPreference_value((Integer)p.getPreferences().get(key));
 				pref.setStudent(toStudent(profileRepo.findById(p.getStudentId()).orElse(null)));
 				pref.setProject(toProject(a));
 				res.add(pref);

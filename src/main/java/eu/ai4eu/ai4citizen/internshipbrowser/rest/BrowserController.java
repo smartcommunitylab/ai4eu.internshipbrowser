@@ -99,13 +99,13 @@ public class BrowserController {
 	
 	@PostMapping("/api/preferences/{studentId}/{activityType}/{registrationYear}/student")
 	@ApiOperation(value="Update student activity preferences")
-	public ResponseEntity<StudentActivityPreference> saveActivityPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Integer> preferences) {
+	public ResponseEntity<StudentActivityPreference> saveActivityPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Object> preferences) {
 		return ResponseEntity.ok(service.saveActivityPreference(studentId, registrationYear, activityType, preferences));
 	}
 
 	@PostMapping("/api/preferences/{studentId}/{activityType}/{registrationYear}/teacher")
 	@ApiOperation(value="Update teacher view of student activity preferences")
-	public ResponseEntity<StudentActivityPreference> saveActivityTeacherPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Integer> preferences) {
+	public ResponseEntity<StudentActivityPreference> saveActivityTeacherPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Object> preferences) {
 		return ResponseEntity.ok(service.saveActivityTeacherPreference(studentId, registrationYear, activityType, preferences));
 	}
 

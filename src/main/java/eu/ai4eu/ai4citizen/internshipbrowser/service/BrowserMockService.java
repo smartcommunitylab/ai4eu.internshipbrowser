@@ -214,13 +214,13 @@ public class BrowserMockService {
 		return pref;
 	}
 	
-	public StudentActivityPreference saveActivityPreference(String studentId, String registrationYear, String activityType, Map<String, Integer> preferences) {
+	public StudentActivityPreference saveActivityPreference(String studentId, String registrationYear, String activityType, Map<String, Object> preferences) {
 		StudentActivityPreference pref = getActivityPreference(studentId, registrationYear, activityType);
 		pref.setPreferences(preferences);
 		return pref;
 	}
 
-	public StudentActivityPreference saveActivityTeacherPreference(String studentId, String registrationYear, String activityType, Map<String, Integer> preferences) {
+	public StudentActivityPreference saveActivityTeacherPreference(String studentId, String registrationYear, String activityType, Map<String, Object> preferences) {
 		StudentActivityPreference pref = getActivityPreference(studentId, registrationYear, activityType);
 		pref.setTeacherPreferences(preferences);
 		return pref;

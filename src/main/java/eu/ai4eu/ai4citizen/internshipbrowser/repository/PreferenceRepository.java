@@ -26,7 +26,7 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentActivityPreference;
  */
 public interface PreferenceRepository extends MongoRepository<StudentActivityPreference, String> {
 
-	@Query("{studentId: ?1, 'template.registrationYear': ?2, 'template.type': ?3}")
+	@Query("{studentId: ?0, 'template.registrationYear': ?1, 'template.type': ?2}")
 	StudentActivityPreference findByStudentIdAndRegistrationYearAndActivityType(String studentId, int year, String type);
 	
 }

@@ -30,8 +30,8 @@ public class StudentActivityPreference {
 	
 	private String studentId;
 	private ActivityTemplate template;
-	private Map<String, Integer> preferences;
-	private Map<String, Integer> teacherPreferences;
+	private Map<String, Object> preferences;
+	private Map<String, Object> teacherPreferences;
 	
 	public String getStudentId() {
 		return studentId;
@@ -45,16 +45,16 @@ public class StudentActivityPreference {
 	public void setTemplate(ActivityTemplate template) {
 		this.template = template;
 	}
-	public Map<String, Integer> getPreferences() {
+	public Map<String, Object> getPreferences() {
 		return preferences;
 	}
-	public void setPreferences(Map<String, Integer> preferences) {
+	public void setPreferences(Map<String, Object> preferences) {
 		this.preferences = preferences;
 	}
-	public Map<String, Integer> getTeacherPreferences() {
+	public Map<String, Object> getTeacherPreferences() {
 		return teacherPreferences;
 	}
-	public void setTeacherPreferences(Map<String, Integer> teacherPreferences) {
+	public void setTeacherPreferences(Map<String, Object> teacherPreferences) {
 		this.teacherPreferences = teacherPreferences;
 	}
 	public String getId() {

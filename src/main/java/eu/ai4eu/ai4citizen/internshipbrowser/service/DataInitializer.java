@@ -86,7 +86,7 @@ public class DataInitializer {
 		
 		// read activities and store as offers
 		Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/activities.json")), Activity[].class))
-				.stream().filter(a -> !a.isInternal() && a.getCompetences() != null && !a.getCompetences().isEmpty()).collect(Collectors.toList())
+				.stream().filter(a -> !a.isInternal()/* && a.getCompetences() != null && !a.getCompetences().isEmpty()*/).collect(Collectors.toList())
 				.forEach(a -> offerRepo.save(a));
 
 	}
