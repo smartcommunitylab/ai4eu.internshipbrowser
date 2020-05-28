@@ -15,7 +15,7 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.model.gb;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author raman
@@ -23,13 +23,13 @@ import java.util.List;
  */
 public class Student {
 
-	private Integer id;
+	private String id;
 	private String name, school;
-	private List<Competence> competences;
-	public Integer getId() {
+	private Map<String, Double> competences;
+	public String getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	public String getName() {
@@ -44,10 +44,11 @@ public class Student {
 	public void setSchool(String school) {
 		this.school = school;
 	}
-	public List<Competence> getCompetences() {
+	public Map<String, Double> getCompetences() {
 		return competences;
 	}
-	public void setCompetences(List<Competence> competences) {
+	public void setCompetences(Map<String, Double> competences) {
 		this.competences = competences;
 	}
 }
+

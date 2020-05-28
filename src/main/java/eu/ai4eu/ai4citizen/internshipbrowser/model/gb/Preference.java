@@ -21,33 +21,31 @@ package eu.ai4eu.ai4citizen.internshipbrowser.model.gb;
  */
 public class Preference {
 
-	private Integer id, preference_value;
-	private Project project;
-	private Student student;
-	public Integer getId() {
+	private Integer value;
+	private String pid;
+	private String sid, id;
+	public Integer getValue() {
+		return value;
+	}
+	public void setValue(Integer value) {
+		this.value = value;
+	}
+	public String getPid() {
+		return pid;
+	}
+	public void setPid(String pid) {
+		this.pid = pid;
+	}
+	public String getSid() {
+		return sid;
+	}
+	public void setSid(String sid) {
+		this.sid = sid;
+	}
+	public String getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
-	public Integer getPreference_value() {
-		return preference_value;
-	}
-	public void setPreference_value(Integer preference_value) {
-		this.preference_value = preference_value;
-	}
-	public Project getProject() {
-		return project;
-	}
-	public void setProject(Project project) {
-		this.project = project;
-	}
-	public Student getStudent() {
-		return student;
-	}
-	public void setStudent(Student student) {
-		this.student = student;
-	}
-	
-	
 }

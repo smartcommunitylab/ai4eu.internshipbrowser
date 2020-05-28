@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,8 +75,13 @@ public class DataInitializer {
 		List<StudyPlan> plans = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/plans.json")), StudyPlan[].class))
 				.stream().filter(p -> p.getCompetences() != null && !p.getCompetences().isEmpty()).collect(Collectors.toList());
 		
+		
+		List<StudentProfile> profiles = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/profile.json")), StudentProfile[].class));
+		Optional<Integer> max = profiles.stream().map(s -> Integer.parseInt(s.getStudentId())).max((a,b) -> a - b);
+		profiles.forEach(p -> profileRepo.save(p));
+
 		// generate students: N students per plan 
-		int count = 0;
+		int count = max.isPresent() ? max.get() : 0;
 		for (StudyPlan p : plans) {
 			p = planRepo.save(p);
 			for (int i = 0; i < STUDENTS_PER_PLAN; i++) {

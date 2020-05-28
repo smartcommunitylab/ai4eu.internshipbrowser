@@ -21,13 +21,13 @@ package eu.ai4eu.ai4citizen.internshipbrowser.model.gb;
  */
 public class Competence {
 
-	private Integer id;
+	private String id;
 	private String name, description;
 	private Double level, weight;
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	public String getName() {

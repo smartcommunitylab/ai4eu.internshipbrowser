@@ -16,6 +16,7 @@
 package eu.ai4eu.ai4citizen.internshipbrowser.model.gb;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author raman
@@ -23,22 +24,16 @@ import java.util.List;
  */
 public class Project {
 
-	private Integer id;
+	private String id;
 	private String institute, description;
 	private Integer teamsize;
-	private Boolean interviewRequired;
-	private List<Competence> competences;
+	private Boolean interview;
+	private Map<String, Double[]> competences;
 
-	public List<Competence> getCompetences() {
-		return competences;
-	}
-	public void setCompetences(List<Competence> competences) {
-		this.competences = competences;
-	}
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	public String getInstitute() {
@@ -59,10 +54,16 @@ public class Project {
 	public void setTeamsize(Integer teamsize) {
 		this.teamsize = teamsize;
 	}
-	public Boolean getInterviewRequired() {
-		return interviewRequired;
+	public Boolean getInterview() {
+		return interview;
 	}
-	public void setInterviewRequired(Boolean interviewRequired) {
-		this.interviewRequired = interviewRequired;
+	public void setInterview(Boolean interviewRequired) {
+		this.interview = interviewRequired;
+	}
+	public Map<String, Double[]> getCompetences() {
+		return competences;
+	}
+	public void setCompetences(Map<String, Double[]> competences) {
+		this.competences = competences;
 	}
 }

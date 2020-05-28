@@ -15,6 +15,7 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.rest;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,6 +50,12 @@ public class BrowserController {
 	@Autowired
 	private BrowserService service;
 	
+	@GetMapping("/api/profile")
+	@ApiOperation(value="Get all student profiles")
+	public ResponseEntity<List<StudentProfile>> getProfiles() {
+		return ResponseEntity.ok(service.getProfiles());
+	}
+
 	@GetMapping("/api/profile/{studentId:.*}")
 	@ApiOperation(value="Get student profile")
 	public ResponseEntity<StudentProfile> getProfile(@PathVariable String studentId) {
@@ -89,6 +96,12 @@ public class BrowserController {
 	@ApiOperation(value="Get activity assignment")
 	public ResponseEntity<ActivityAssignment> getActivityAssignment(@PathVariable String activityId) {
 		return ResponseEntity.ok(service.getActivityAssignment(activityId));
+	}
+
+	@GetMapping("/api/activityassignment/student/{studentId:.*}")
+	@ApiOperation(value="Get student assignment")
+	public ResponseEntity<ActivityAssignment> getActivityAssignmentForStudent(@PathVariable String studentId) {
+		return ResponseEntity.ok(service.getStudentAssignment(studentId));
 	}
 
 	@GetMapping("/api/preferences/{studentId}/{activityType}/{registrationYear}")

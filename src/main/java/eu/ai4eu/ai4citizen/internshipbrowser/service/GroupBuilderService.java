@@ -16,10 +16,11 @@
 package eu.ai4eu.ai4citizen.internshipbrowser.service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,6 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.gb.Competence;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.gb.Preference;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.gb.Project;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.gb.Student;
-import eu.ai4eu.ai4citizen.internshipbrowser.model.gb.Team;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.AssignmentRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.OfferRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.PlanRepository;
@@ -73,43 +73,64 @@ public class GroupBuilderService {
 
 	private RestTemplate restTemplate = new RestTemplate();
 	
+	@SuppressWarnings("unchecked")
 	public void buildAll() throws Exception {
 		// convert students
 		List<Student> students = profileRepo.findAll()
-				.stream().map(s -> toStudent(s)).collect(Collectors.toList());
+				.stream().filter(s -> !s.getCompetences().isEmpty()).map(s -> toStudent(s)).collect(Collectors.toList());
 		
+		Map<String, Object> studentContainer = new HashMap<>();
+		students.forEach(s -> studentContainer.put(s.getId(), s));
 		logger.info(new ObjectMapper().writeValueAsString(students));
-		restTemplate.postForObject(endpoint +  "/students", students, String.class);
+//		String studentGroupId = restTemplate.postForObject(endpoint +  "/students", studentContainer, String.class);
 		
 		// convert original offers
 		List<Project> projects = offerRepo.findAll()
-				.stream().map(o -> toProject(o)).collect(Collectors.toList());
-		restTemplate.postForObject(endpoint +  "/projects", projects, String.class);
+				.stream().filter(p -> !p.getCompetences().isEmpty()).map(o -> toProject(o)).collect(Collectors.toList());
+		Map<String, Object> projectContainer = new HashMap<>();
+		projects.forEach(s -> projectContainer.put(s.getId(), s));
+		logger.info(new ObjectMapper().writeValueAsString(projectContainer));
+//		String projectGroupId = restTemplate.postForObject(endpoint +  "/projects", projectContainer, String.class);
 		
 		// preferences extracted from DV
 		List<Preference> preferences = prefRepo.findAll()
 			.stream().flatMap(p -> toPreference(p).stream()).collect(Collectors.toList());
+		Map<String, Object> prefContainer = new HashMap<>();
+		String prefGroupId = null;
 		if (preferences.size() > 0) {
-			restTemplate.postForObject(endpoint +  "/preferences", preferences, String.class);
+			preferences.forEach(p -> prefContainer.put(p.getId(), p));
+//			prefGroupId = restTemplate.postForObject(endpoint +  "/preferences", preferences, String.class);
 		}
 		
-		List<Team> assignments = Arrays.asList(restTemplate.getForObject(endpoint + "/groupbuilder", Team[].class));
-		assignments.forEach(a -> {
+		Map<String, Map<String, Object>> container = new HashMap<>();
+		container.put("students", studentContainer);
+		container.put("projects", projectContainer);
+		container.put("preferences", prefContainer);
+
+		logger.info(new ObjectMapper().writeValueAsString(container));
+		
+//		String url = endpoint + "/team_formation/" +  studentGroupId +"/" + projectGroupId + (prefGroupId != null ? ("/" + prefGroupId) : "");
+//		List<Team> assignments = Arrays.asList(restTemplate.getForObject(url, Team[].class));
+		
+		Map<String, List<String>> assignmentMap = restTemplate.postForObject(endpoint + "/team_formation", container, Map.class);
+		assignmentMap.keySet().forEach(a -> {
 			ActivityAssignment assignment = new ActivityAssignment();
-			assignment.setActivityId(a.getProject().getId()+"");
+			assignment.setActivityId(a);
 			assignment.setStatus("assigned");
-			assignment.setTeamSize(a.getProject().getTeamsize());
+			assignment.setTeamSize(assignmentMap.get(a).size());
 			assignment.setUpdated(LocalDateTime.now());
-			assignment.setStudents(a.getAssigned_students().stream().map(s -> s.getId()+"").collect(Collectors.toSet()));
+			assignment.setStudents(new HashSet<>(assignmentMap.get(a)));
 			assignmentRepo.save(assignment);
 		});
 	}
 	
 	private Student toStudent(StudentProfile p) {
 		Student student = new Student();
-		student.setId(Integer.parseInt(p.getStudentId()));
+		student.setId(p.getStudentId());
 		student.setSchool(p.getInstitute());
 		student.setName(p.fullName());
+		student.setCompetences(new HashMap<>());
+
 		List<Competence> competences = new LinkedList<Competence>();
 		competences.addAll(p.getCompetences().stream().map(c -> toCompetence(c, 1d)).collect(Collectors.toList()));
 		Set<String> directCompetences = p.getCompetences() != null ? p.getCompetences().stream().map(c -> c.getId()).collect(Collectors.toSet()): new HashSet<>();
@@ -121,7 +142,7 @@ public class GroupBuilderService {
 				}
 			});
 		}
-		student.setCompetences(competences);
+		competences.forEach(c -> student.getCompetences().put(c.getId(), c.getLevel()));
 		return student;
 	}
 	
@@ -129,7 +150,7 @@ public class GroupBuilderService {
 	private Competence toCompetence(eu.ai4eu.ai4citizen.internshipbrowser.model.Competence c, Double level) {
 		Competence res = new Competence();
 		res.setDescription(c.getDescription());
-		res.setId(Integer.parseInt(c.getId()));
+		res.setId(c.getId());
 		res.setName(c.getTitle());
 		res.setWeight(1d);
 		res.setLevel(level);
@@ -138,11 +159,15 @@ public class GroupBuilderService {
 
 	private Project toProject(Activity offer) {
 		Project p = new Project();
-		p.setCompetences(offer.getCompetences().stream().map(c -> toCompetence(c, 1d)).collect(Collectors.toList()));
+		List<Competence> competences = offer.getCompetences().stream().map(c -> toCompetence(c, 1d)).collect(Collectors.toList());
+		p.setCompetences(new HashMap<>());
+		competences.forEach(c -> {
+			p.getCompetences().put(c.getId(), new Double[] {c.getWeight(), 1d});
+		});
 		p.setDescription(offer.getDescription());
-		p.setId(Integer.parseInt(offer.getActivityId()));
+		p.setId(offer.getActivityId());
 		p.setInstitute(offer.getCompany());
-		p.setInterviewRequired(false);
+		p.setInterview(false);
 		p.setTeamsize(offer.getTeamSize());
 		return p;
 	}
@@ -153,9 +178,10 @@ public class GroupBuilderService {
 			Activity a = offerRepo.findById(key).orElse(null);
 			if (a != null) {
 				Preference pref = new Preference();
-				pref.setPreference_value((Integer)p.getPreferences().get(key));
-				pref.setStudent(toStudent(profileRepo.findById(p.getStudentId()).orElse(null)));
-				pref.setProject(toProject(a));
+				pref.setId(p.getId());
+				pref.setValue((Integer)p.getPreferences().get(key));
+				pref.setSid(p.getStudentId());
+				pref.setPid(a.getActivityId());
 				res.add(pref);
 			}
 		});

@@ -16,6 +16,7 @@
 package eu.ai4eu.ai4citizen.internshipbrowser.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityAssignment;
 
@@ -24,5 +25,9 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityAssignment;
  *
  */
 public interface AssignmentRepository extends MongoRepository<ActivityAssignment, String> {
+
+	
+	@Query("{students: ?0}")
+	ActivityAssignment findByStudentId(String studentId);
 
 }

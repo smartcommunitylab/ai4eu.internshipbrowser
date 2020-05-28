@@ -15,7 +15,6 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.service;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,8 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import com.google.common.collect.Lists;
 
 import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityAssignment;
@@ -219,36 +216,12 @@ public class BrowserService {
 	
 	public ActivityAssignment getActivityAssignment(String activityId) {
 		ActivityAssignment stored = assignmentRepo.findById(activityId).orElse(null);
-		if (stored != null) return stored;
-		
-		ActivityAssignment assignment = new ActivityAssignment();
-		assignment.setActivityId(activityId);
-		assignment.setStatus(ActivityAssignment.STATUS_PENDING);
-		Activity activity = offerRepo.findById(activityId).orElse(null);
-		if (activity == null) return null;
-		assignment.setTeamSize(activity.getTeamSize());
-		assignment.setUpdated(LocalDateTime.now());
-		return assignment;
+		return stored;
 	}
 
 	public StudentActivityPreference getActivityPreference(String studentId, String registrationYear, String activityType) {
 		StudentActivityPreference stored = prefRepo.findByStudentIdAndRegistrationYearAndActivityType(studentId, Integer.parseInt(registrationYear), ActivityTemplate.TYPE_INTERNSHIP);
-		if (stored != null) return stored;
-		
-		StudentActivityPreference pref = new StudentActivityPreference();
-		pref.setStudentId(studentId);
-		ActivityTemplate template = new ActivityTemplate();
-		template.setType(activityType);
-		StudentProfile profile = getProfile(studentId);
-		template.setCourse(profile.getCourse());
-		template.setCourseYear(profile.getCourseYear());
-		template.setRegistrationYear(Integer.parseInt(registrationYear));
-		template.setInstitute(profile.getInstitute());
-		template.setInstituteId(profile.getInstituteId());
-		template.setPlanId(profile.getPlanId());
-		template.setPlanTitle(profile.getPlanTitle());
-		pref.setTemplate(template);
-		return pref;
+		return stored;
 	}
 	
 	public StudentActivityPreference saveActivityPreference(String studentId, String registrationYear, String activityType, Map<String, Object> preferences) {
@@ -339,6 +312,22 @@ public class BrowserService {
 		case location: 
 		default: return Collections.emptySet();
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	public List<StudentProfile> getProfiles() {
+		return profileRepo.findAll();
+	}
+
+	/**
+	 * @param studentId
+	 * @return
+	 */
+	public ActivityAssignment getStudentAssignment(String studentId) {
+		ActivityAssignment stored = assignmentRepo.findByStudentId(studentId);
+		return stored;
 	}
 	
 }
