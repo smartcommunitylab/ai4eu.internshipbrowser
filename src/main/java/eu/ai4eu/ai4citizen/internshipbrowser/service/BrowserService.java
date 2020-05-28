@@ -329,5 +329,12 @@ public class BrowserService {
 		ActivityAssignment stored = assignmentRepo.findByStudentId(studentId);
 		return stored;
 	}
+
+	/**
+	 * @return
+	 */
+	public List<ActivityAssignment> getActivityAssignments() {
+		return assignmentRepo.findAll();
+	}
 	
 }

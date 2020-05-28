@@ -98,6 +98,12 @@ public class BrowserController {
 		return ResponseEntity.ok(service.getActivityAssignment(activityId));
 	}
 
+	@GetMapping("/api/activityassignment")
+	@ApiOperation(value="Get activity assignment")
+	public ResponseEntity<List<ActivityAssignment>> getActivityAssignments() {
+		return ResponseEntity.ok(service.getActivityAssignments());
+	}
+
 	@GetMapping("/api/activityassignment/student/{studentId:.*}")
 	@ApiOperation(value="Get student assignment")
 	public ResponseEntity<ActivityAssignment> getActivityAssignmentForStudent(@PathVariable String studentId) {
