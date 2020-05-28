@@ -37,6 +37,7 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityTemplate;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
+import eu.ai4eu.ai4citizen.internshipbrowser.repository.AssignmentRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.OfferRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.PlanRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.StudentProfileRepository;
@@ -62,12 +63,15 @@ public class DataInitializer {
 	private StudentProfileRepository profileRepo;
 	@Autowired
 	private OfferRepository offerRepo;
+	@Autowired
+	private AssignmentRepository assignRepo;
 
 	public void initData() throws Exception {
 		
 		planRepo.deleteAll();
 		profileRepo.deleteAll();
 		offerRepo.deleteAll();
+		assignRepo.deleteAll();
 		
 		ObjectMapper mapper = new ObjectMapper();
 		
