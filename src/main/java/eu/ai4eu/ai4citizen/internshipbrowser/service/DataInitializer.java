@@ -82,7 +82,21 @@ public class DataInitializer {
 		
 		List<StudentProfile> profiles = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/profile.json")), StudentProfile[].class));
 		Optional<Integer> max = profiles.stream().map(s -> Integer.parseInt(s.getStudentId())).max((a,b) -> a - b);
-		profiles.forEach(p -> profileRepo.save(p));
+		profiles.forEach(p -> {
+			if (p.getFutureActivities() == null || p.getFutureActivities().isEmpty()) {
+				ActivityTemplate a = new ActivityTemplate();
+				a.setCourse(p.getCourse());
+				a.setCourseYear(p.getCourseYear());
+				a.setInstitute(p.getInstitute());
+				a.setPlanId(p.getPlanId());
+				a.setPlanTitle(p.getPlanTitle());
+				a.setRegistrationYear(p.getRegistrationYear());
+				a.setInternal(false);
+				a.setType(ActivityTemplate.TYPE_INTERNSHIP);
+				p.setFutureActivities(Collections.singletonList(a));				
+			}
+			profileRepo.save(p);
+		});
 
 		// generate students: N students per plan 
 		int count = max.isPresent() ? max.get() : 0;
