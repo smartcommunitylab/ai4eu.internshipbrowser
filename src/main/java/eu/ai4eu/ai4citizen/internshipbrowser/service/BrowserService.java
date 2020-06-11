@@ -221,6 +221,22 @@ public class BrowserService {
 
 	public StudentActivityPreference getActivityPreference(String studentId, String registrationYear, String activityType) {
 		StudentActivityPreference stored = prefRepo.findByStudentIdAndRegistrationYearAndActivityType(studentId, Integer.parseInt(registrationYear), ActivityTemplate.TYPE_INTERNSHIP);
+		if (stored == null) {
+			stored = new StudentActivityPreference();
+			stored.setStudentId(studentId);
+			ActivityTemplate template = new ActivityTemplate();
+			template.setType(activityType);
+			StudentProfile profile = getProfile(studentId);
+			template.setCourse(profile.getCourse());
+			template.setCourseYear(profile.getCourseYear());
+			template.setRegistrationYear(Integer.parseInt(registrationYear));
+			template.setInstitute(profile.getInstitute());
+			template.setInstituteId(profile.getInstituteId());
+			template.setPlanId(profile.getPlanId());
+			template.setPlanTitle(profile.getPlanTitle());
+			stored.setTemplate(template);
+			stored = prefRepo.save(stored);
+		}
 		return stored;
 	}
 	
