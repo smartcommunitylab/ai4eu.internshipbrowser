@@ -33,7 +33,7 @@ public class Competence {
 	private String id;
 	private boolean custom;
 	private String externalId, source, title, description;
-	private Integer eqfLevel;
+	private String eqfLevel, escoId, escoTitle;
 	
 	private List<Competence> skills, abilities, knowledge;
 
@@ -109,11 +109,40 @@ public class Competence {
 		this.knowledge = knowledge;
 	}
 
-	public Integer getEqfLevel() {
+	public String getEqfLevel() {
 		return eqfLevel;
 	}
 
-	public void setEqfLevel(Integer eqfLevel) {
+	public void setEqfLevel(String eqfLevel) {
 		this.eqfLevel = eqfLevel;
 	}
+
+	/**
+	 * @return the escoId
+	 */
+	public String getEscoId() {
+		return escoId;
+	}
+
+	/**
+	 * @param escoId the escoId to set
+	 */
+	public void setEscoId(String escoId) {
+		this.escoId = escoId;
+	}
+
+	/**
+	 * @return the escoTitle
+	 */
+	public String getEscoTitle() {
+		return escoTitle;
+	}
+
+	/**
+	 * @param escoTitle the escoTitle to set
+	 */
+	public void setEscoTitle(String escoTitle) {
+		this.escoTitle = escoTitle;
+	}
+	
 }

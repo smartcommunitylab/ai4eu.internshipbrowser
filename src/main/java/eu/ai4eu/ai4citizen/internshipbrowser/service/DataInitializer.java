@@ -98,15 +98,21 @@ public class DataInitializer {
 			profileRepo.save(p);
 		});
 
-		// generate students: N students per plan 
-		int count = max.isPresent() ? max.get() : 0;
-		for (StudyPlan p : plans) {
-			p = planRepo.save(p);
-			for (int i = 0; i < STUDENTS_PER_PLAN; i++) {
-				StudentProfile profile = generateStudent(p, count++);
-				profileRepo.save(profile);
-			}
-		};
+		profiles = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/profiles.json")), StudentProfile[].class));
+		profiles.forEach(p -> {
+			profileRepo.save(p);
+		});
+
+		
+//		// generate students: N students per plan 
+//		int count = max.isPresent() ? max.get() : 0;
+//		for (StudyPlan p : plans) {
+//			p = planRepo.save(p);
+//			for (int i = 0; i < STUDENTS_PER_PLAN; i++) {
+//				StudentProfile profile = generateStudent(p, count++);
+//				profileRepo.save(profile);
+//			}
+//		};
 		
 		// read activities and store as offers
 		Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/activities.json")), Activity[].class))

@@ -145,7 +145,7 @@ public class BrowserService {
 		dist50.setKeys(Collections.singleton("< 50"));
 		ActivityClusterAssignment dist50p = new ActivityClusterAssignment();
 		dist50p.setKeys(Collections.singleton("50 +"));
-		offers.forEach(a -> {
+		offers.stream().filter(o -> o.getLatitute() != null && o.getLongitude() != null).forEach(a -> {
 			double dist = distance(a.getLatitute(), a.getLongitude(), profile.getLatitute(), profile.getLongitude());
 			if (dist < 5) dist5.getActivities().add(a.getActivityId());
 			else if (dist < 10) dist10.getActivities().add(a.getActivityId());
@@ -299,7 +299,7 @@ public class BrowserService {
 		return matcher.find() ? matcher.group(1).trim().toUpperCase() : "-";
 	}
 
-	private double distance(double lat1, double lon1, double lat2, double lon2) {
+	private double distance(Double lat1, Double lon1, Double lat2, Double lon2) {
 		lat1 = Math.toRadians(lat1);
 		lon1 = Math.toRadians(lon1);
 		lat2 = Math.toRadians(lat2);
