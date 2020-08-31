@@ -205,14 +205,7 @@ public class DataConverter {
 			p.setCurrentActivities(Collections.emptyList());
 			p.setFutureActivities(Collections.emptyList());
 			p.setFiscalCode(cleanValue(line[0]));
-			ActivityTemplate a = new ActivityTemplate();
-			a.setCourse(p.getCourse());
-			a.setCourseYear(p.getCourseYear());
-			a.setInstitute(p.getInstitute());
-			a.setRegistrationYear(p.getRegistrationYear());
-			a.setInternal(false);
-			a.setType(ActivityTemplate.TYPE_INTERNSHIP);
-			p.setFutureActivities(Collections.singletonList(a));
+			
 			p.setName("Nome" + idx);
 			p.setSurname("Cognome" + idx);
 			idxMap.put("idx", idx + 1);
@@ -238,6 +231,18 @@ public class DataConverter {
 				return comp;
 			}).filter(c -> c.getId() != null && !c.getId().equals("NULL")).collect(Collectors.toList()));
 
+			ActivityTemplate a = new ActivityTemplate();
+			a.setCourse(p.getCourse());
+			a.setCourseYear(p.getCourseYear());
+			a.setInstitute(p.getInstitute());
+			a.setInstituteId(p.getInstituteId());
+			a.setPlanId(p.getPlanId());
+			a.setPlanTitle(p.getPlanTitle());
+			a.setRegistrationYear(p.getRegistrationYear());
+			a.setInternal(false);
+			a.setType(ActivityTemplate.TYPE_INTERNSHIP);
+			p.setFutureActivities(Collections.singletonList(a));				
+			
 			return p;
 		}).collect(Collectors.toList());
 		return collect;

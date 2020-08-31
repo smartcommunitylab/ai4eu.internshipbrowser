@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -79,6 +80,7 @@ public class DataInitializer {
 		List<StudyPlan> plans = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/plans.json")), StudyPlan[].class))
 				.stream().filter(p -> p.getCompetences() != null && !p.getCompetences().isEmpty()).collect(Collectors.toList());
 		
+		Map<String, StudyPlan> planMap = plans.stream().collect(Collectors.toMap(p -> p.getCourse() +"@"  + p.getInstituteId(), p -> p));
 		
 		List<StudentProfile> profiles = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/profile.json")), StudentProfile[].class));
 		Optional<Integer> max = profiles.stream().map(s -> Integer.parseInt(s.getStudentId())).max((a,b) -> a - b);
@@ -88,8 +90,12 @@ public class DataInitializer {
 				a.setCourse(p.getCourse());
 				a.setCourseYear(p.getCourseYear());
 				a.setInstitute(p.getInstitute());
-				a.setPlanId(p.getPlanId());
-				a.setPlanTitle(p.getPlanTitle());
+				a.setInstituteId(p.getInstituteId());
+				StudyPlan plan = planMap.get(a.getCourse()+"@" + a.getInstituteId());
+				if (plan != null) {
+					a.setPlanId(plan.getPlanId());
+					a.setPlanTitle(plan.getTitle());
+				}
 				a.setRegistrationYear(p.getRegistrationYear());
 				a.setInternal(false);
 				a.setType(ActivityTemplate.TYPE_INTERNSHIP);
@@ -100,6 +106,22 @@ public class DataInitializer {
 
 		profiles = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/profiles.json")), StudentProfile[].class));
 		profiles.forEach(p -> {
+			
+			ActivityTemplate a = new ActivityTemplate();
+			a.setCourse(p.getCourse());
+			a.setCourseYear(p.getCourseYear());
+			a.setInstitute(p.getInstitute());
+			a.setInstituteId(p.getInstituteId());
+			StudyPlan plan = planMap.get(a.getCourse()+"@" + a.getInstituteId());
+			if (plan != null) {
+				a.setPlanId(plan.getPlanId());
+				a.setPlanTitle(plan.getTitle());
+			}
+			a.setRegistrationYear(p.getRegistrationYear());
+			a.setInternal(false);
+			a.setType(ActivityTemplate.TYPE_INTERNSHIP);
+			p.setFutureActivities(Collections.singletonList(a));				
+
 			profileRepo.save(p);
 		});
 
