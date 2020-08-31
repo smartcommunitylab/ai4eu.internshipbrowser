@@ -80,7 +80,7 @@ public class DataInitializer {
 		List<StudyPlan> plans = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/plans.json")), StudyPlan[].class))
 				.stream().filter(p -> p.getCompetences() != null && !p.getCompetences().isEmpty()).collect(Collectors.toList());
 		
-		Map<String, StudyPlan> planMap = plans.stream().collect(Collectors.toMap(p -> p.getCourse() +"@"  + p.getInstituteId(), p -> p));
+		Map<String, StudyPlan> planMap = plans.stream().collect(Collectors.toMap(p -> p.getCourse() +"@"  + p.getInstituteId(), p -> p, (existing, replacement) -> existing));
 		
 		List<StudentProfile> profiles = Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/profile.json")), StudentProfile[].class));
 		Optional<Integer> max = profiles.stream().map(s -> Integer.parseInt(s.getStudentId())).max((a,b) -> a - b);
