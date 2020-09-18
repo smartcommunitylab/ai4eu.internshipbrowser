@@ -29,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class ActivityClustering {
 
+	public enum CLUSTER {city, location, company, topic};
+	
 	private List<ActivityCluster> clusters;
 
 

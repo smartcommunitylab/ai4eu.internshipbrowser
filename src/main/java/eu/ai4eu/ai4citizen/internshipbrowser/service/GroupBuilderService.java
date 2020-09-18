@@ -16,6 +16,7 @@
 package eu.ai4eu.ai4citizen.internshipbrowser.service;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -73,10 +74,22 @@ public class GroupBuilderService {
 
 	private RestTemplate restTemplate = new RestTemplate();
 	
-	@SuppressWarnings("unchecked")
 	public void buildAll() throws Exception {
+		build(profileRepo.findAll(), offerRepo.findAll(), prefRepo.findAll());
+	}
+	public void buildClass(String courseClass, String year) throws Exception {
+		
+		List<StudentActivityPreference> prefs = prefRepo.findAll();
+		List<StudentProfile> profiles = profileRepo.findByCourseClassAndCourseYear(courseClass, year);
+		Set<String> ids = profiles.stream().map(p -> p.getStudentId()).collect(Collectors.toSet());
+		prefs = prefs.stream().filter(p -> ids.contains(p.getStudentId())).collect(Collectors.toList());
+		build(profiles, offerRepo.findAll(), prefs);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void build (List<StudentProfile> profiles, List<Activity> offers, List<StudentActivityPreference> dbPrefs) throws Exception {
 		// convert students
-		List<Student> students = profileRepo.findAll()
+		List<Student> students = profiles
 				.stream().filter(s -> !s.getCompetences().isEmpty()).map(s -> toStudent(s)).collect(Collectors.toList());
 		
 		Map<String, Object> studentContainer = new HashMap<>();
@@ -85,7 +98,7 @@ public class GroupBuilderService {
 //		String studentGroupId = restTemplate.postForObject(endpoint +  "/students", studentContainer, String.class);
 		
 		// convert original offers
-		List<Project> projects = offerRepo.findAll()
+		List<Project> projects = offers
 				.stream().filter(p -> !p.getCompetences().isEmpty()).map(o -> toProject(o)).collect(Collectors.toList());
 		Map<String, Object> projectContainer = new HashMap<>();
 		projects.forEach(s -> projectContainer.put(s.getId(), s));
@@ -93,10 +106,9 @@ public class GroupBuilderService {
 //		String projectGroupId = restTemplate.postForObject(endpoint +  "/projects", projectContainer, String.class);
 		
 		// preferences extracted from DV
-		List<Preference> preferences = prefRepo.findAll()
+		List<Preference> preferences = dbPrefs
 			.stream().flatMap(p -> toPreference(p).stream()).collect(Collectors.toList());
 		Map<String, Object> prefContainer = new HashMap<>();
-		String prefGroupId = null;
 		if (preferences.size() > 0) {
 			preferences.forEach(p -> prefContainer.put(p.getId(), p));
 //			prefGroupId = restTemplate.postForObject(endpoint +  "/preferences", preferences, String.class);
@@ -123,7 +135,7 @@ public class GroupBuilderService {
 			assignmentRepo.save(assignment);
 		});
 	}
-	
+ 	
 	private Student toStudent(StudentProfile p) {
 		Student student = new Student();
 		student.setId(p.getStudentId());
@@ -150,6 +162,7 @@ public class GroupBuilderService {
 	private Competence toCompetence(eu.ai4eu.ai4citizen.internshipbrowser.model.Competence c, Double level) {
 		Competence res = new Competence();
 		res.setDescription(c.getDescription());
+		// TODO change to ESCO
 		res.setId(c.getId());
 		res.setName(c.getTitle());
 		res.setWeight(1d);
@@ -172,19 +185,29 @@ public class GroupBuilderService {
 		return p;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<Preference> toPreference(StudentActivityPreference p) {
 		final List<Preference> res = new LinkedList<>();
-		p.getPreferences().keySet().forEach(key -> {
-			Activity a = offerRepo.findById(key).orElse(null);
-			if (a != null) {
-				Preference pref = new Preference();
-				pref.setId(p.getId());
-				pref.setValue((Integer)p.getPreferences().get(key));
-				pref.setSid(p.getStudentId());
-				pref.setPid(a.getActivityId());
-				res.add(pref);
+		// TODO consider cluster preferences ?
+		if (p.getPreferences() != null && p.getPreferences().containsKey("ilike")) {
+			Collection<String> c = (Collection<String>) p.getPreferences().get("ilike");
+			int i = 0;
+			int dim = c.size() <= 5 ? 1 : ((c.size() / 5) + 1); 
+			// max pref = 10, min pref = 6
+			for (String key : c) {
+				Activity a = offerRepo.findById(key).orElse(null);
+				if (a != null) {
+					Preference pref = new Preference();
+					pref.setId(p.getId());
+					int cell = Math.round(i / dim);
+					pref.setValue(10 - cell);
+					pref.setSid(p.getStudentId());
+					pref.setPid(a.getActivityId());
+					res.add(pref);
+					i++;
+				}
 			}
-		});
+		}
 		return res;
 	}
 }

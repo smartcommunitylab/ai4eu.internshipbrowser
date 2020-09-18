@@ -240,6 +240,8 @@ public class BrowserMockService {
 		offer.setCompany(a.getCompany());
 		offer.setCompetences(a.getCompetences());
 		offer.setDescription(a.getDescription());
+		offer.setUrl(a.getUrl());
+		offer.setImage(a.getImage());
 		offer.setEnd(a.getEnd());
 		offer.setStart(a.getStart());
 		offer.setInternal(a.isInternal());

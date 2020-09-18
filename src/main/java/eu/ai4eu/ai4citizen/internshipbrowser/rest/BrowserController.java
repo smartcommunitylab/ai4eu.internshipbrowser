@@ -35,6 +35,7 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentActivityPreference;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
 import eu.ai4eu.ai4citizen.internshipbrowser.service.BrowserService;
+import eu.ai4eu.ai4citizen.internshipbrowser.service.GroupBuilderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -49,6 +50,8 @@ public class BrowserController {
 
 	@Autowired
 	private BrowserService service;
+	@Autowired
+	private GroupBuilderService groupBuilder;
 	
 	@GetMapping("/api/profile")
 	@ApiOperation(value="Get all student profiles")
@@ -60,6 +63,16 @@ public class BrowserController {
 	@ApiOperation(value="Get student profile")
 	public ResponseEntity<StudentProfile> getProfile(@PathVariable String studentId) {
 		return ResponseEntity.ok(service.getProfile(studentId));
+	}
+	@GetMapping("/api/profile/institute/{instituteId:.*}")
+	@ApiOperation(value="Get student profiles of an institute")
+	public ResponseEntity<List<StudentProfile>> getProfilesInInstitute(@PathVariable String instituteId) {
+		return ResponseEntity.ok(service.getProfilesInInstitute(instituteId));
+	}
+	@GetMapping("/api/profile/courseClass/{year}/{courseClass:.*}")
+	@ApiOperation(value="Get student profiles of a class")
+	public ResponseEntity<List<StudentProfile>> getProfilesInCourseClass(@PathVariable String year, @PathVariable String courseClass) {
+		return ResponseEntity.ok(service.getProfilesInClass(courseClass, year));
 	}
 
 	@GetMapping("/api/activities/{studentId}/{activityType}/{registrationYear}")
@@ -126,6 +139,13 @@ public class BrowserController {
 	@ApiOperation(value="Update teacher view of student activity preferences")
 	public ResponseEntity<StudentActivityPreference> saveActivityTeacherPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Object> preferences) {
 		return ResponseEntity.ok(service.saveActivityTeacherPreference(studentId, registrationYear, activityType, preferences));
+	}
+
+	@PostMapping("/api/assign/{year}/{courseClass:.*}")
+	@ApiOperation(value="Trigger group building algorithm for a class")
+	public ResponseEntity<Void> assignClass(@PathVariable String year, @PathVariable String courseClass) throws Exception {
+		groupBuilder.buildClass(courseClass, year);
+		return ResponseEntity.ok().build();
 	}
 
 }

@@ -35,6 +35,7 @@ public class Activity extends ActivityTemplate {
 	private Double latitute, longitude;
 	private String company;
 	private String description;
+	private String url, image;
 	
 	private Integer teamSize;
 	
@@ -91,5 +92,29 @@ public class Activity extends ActivityTemplate {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	/**
+	 * @return the url
+	 */
+	public String getUrl() {
+		return url;
+	}
+	/**
+	 * @param url the url to set
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	/**
+	 * @return the image
+	 */
+	public String getImage() {
+		return image;
+	}
+	/**
+	 * @param image the image to set
+	 */
+	public void setImage(String image) {
+		this.image = image;
 	}
 }

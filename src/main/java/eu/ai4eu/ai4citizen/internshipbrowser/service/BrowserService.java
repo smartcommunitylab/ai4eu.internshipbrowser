@@ -119,7 +119,7 @@ public class BrowserService {
 
 	private ActivityCluster extractCities(List<Activity> offers) {
 		ActivityCluster cityCluster = new ActivityCluster();
-		cityCluster.setType("city");
+		cityCluster.setType(CLUSTER.city.toString());
 		cityCluster.setAssignments(new LinkedList<>());
 		Map<String, List<Activity>> cityLists = offers.stream().collect(Collectors.groupingBy(a ->  extractCity(a.getAddress())));
 		cityLists.keySet().forEach(key -> {
@@ -135,7 +135,7 @@ public class BrowserService {
 
 	private ActivityCluster extractDistances(final StudentProfile profile, List<Activity> offers) {
 		ActivityCluster locationCluster = new ActivityCluster();
-		locationCluster.setType("location");
+		locationCluster.setType(CLUSTER.location.toString());
 		locationCluster.setAssignments(new LinkedList<>());
 		ActivityClusterAssignment dist5 = new ActivityClusterAssignment();
 		dist5.setKeys(Collections.singleton("< 5"));
@@ -162,7 +162,7 @@ public class BrowserService {
 	private ActivityCluster extractCompanyTypes(List<Activity> offers) {
 		ActivityCluster companyCluster = new ActivityCluster();
 		companyCluster.setAssignments(new LinkedList<>());
-		companyCluster.setType("company");
+		companyCluster.setType(CLUSTER.company.toString());
 		Set<String> privateBodies = new HashSet<>(Arrays.asList("s.r.l", " srl", " snc", "s.p.a", " spa", "responsabilit", " sas", "s.n.c", "studio"));
 		Set<String> publicBodies = new HashSet<>(Arrays.asList("universit", "vigil", "fondazione", "istituto", "comune "));
 		
@@ -184,14 +184,18 @@ public class BrowserService {
 	private ActivityCluster extractTopics(List<Activity> offers) {
 		ActivityCluster topicCluster = new ActivityCluster();
 		topicCluster.setAssignments(new LinkedList<>());
-		topicCluster.setType("topic");
-		Map<String, List<Activity>> lists = offers.stream().collect(Collectors.groupingBy(a -> a.getCourse()));
-		lists.keySet().forEach(key -> {
-			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
-			assignment.setKeys(Collections.singleton(key));
-			assignment.setActivities(lists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
-			topicCluster.getAssignments().add(assignment);
-		});
+		topicCluster.setType(CLUSTER.topic.toString());
+//		Map<String, List<Activity>> lists = offers.stream().collect(Collectors.groupingBy(a -> a.getCourse()));
+//		lists.keySet().forEach(key -> {
+//			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
+//			assignment.setKeys(Collections.singleton(key));
+//			assignment.setActivities(lists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
+//			topicCluster.getAssignments().add(assignment);
+//		});
+		ActivityClusterAssignment assignment = new ActivityClusterAssignment();
+		assignment.setKeys(Collections.singleton("test"));
+		assignment.setActivities(offers.stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
+		topicCluster.getAssignments().add(assignment);
 		return topicCluster;
 	}
 	
@@ -270,6 +274,8 @@ public class BrowserService {
 		offer.setCompany(a.getCompany());
 		offer.setCompetences(a.getCompetences());
 		offer.setDescription(a.getDescription());
+		offer.setUrl(a.getUrl());
+		offer.setImage(a.getImage());
 		offer.setEnd(a.getEnd());
 		offer.setStart(a.getStart());
 		offer.setInternal(a.isInternal());
@@ -335,6 +341,24 @@ public class BrowserService {
 	 */
 	public List<StudentProfile> getProfiles() {
 		return profileRepo.findAll();
+	}
+
+
+	/**
+	 * @param instituteId
+	 * @return
+	 */
+	public List<StudentProfile> getProfilesInInstitute(String instituteId) {
+		return profileRepo.findByInstituteId(instituteId);
+	}
+
+	/**
+	 * @param courseClass
+	 * @param year 
+	 * @return
+	 */
+	public List<StudentProfile> getProfilesInClass(String courseClass, String year) {
+		return profileRepo.findByCourseClassAndCourseYear(courseClass, year);
 	}
 
 	/**

@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -95,6 +96,10 @@ public class DataInitializer {
 				if (plan != null) {
 					a.setPlanId(plan.getPlanId());
 					a.setPlanTitle(plan.getTitle());
+					if (StringUtils.isEmpty(p.getPlanId())) {
+						p.setPlanId(plan.getPlanId());
+						p.setPlanTitle(plan.getTitle());
+					}
 				}
 				a.setRegistrationYear(p.getRegistrationYear());
 				a.setInternal(false);
@@ -116,6 +121,10 @@ public class DataInitializer {
 			if (plan != null) {
 				a.setPlanId(plan.getPlanId());
 				a.setPlanTitle(plan.getTitle());
+				if (StringUtils.isEmpty(p.getPlanId())) {
+					p.setPlanId(plan.getPlanId());
+					p.setPlanTitle(plan.getTitle());
+				}
 			}
 			a.setRegistrationYear(p.getRegistrationYear());
 			a.setInternal(false);

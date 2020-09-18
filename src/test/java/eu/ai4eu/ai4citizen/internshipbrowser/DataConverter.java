@@ -99,11 +99,12 @@ public class DataConverter {
 		return collect;
 	}
 	
-	public static List<Activity> convertActivities(String url) throws IOException {
+	public static List<Activity> convertActivities(String url, String companies) throws IOException {
 		List<String> lines = Files.readAllLines(Paths.get(url));
 		lines = lines.subList(1, lines.size());
-		
 		List<String[]> list = lines.stream().map(s -> s.split(";")).filter(l -> l.length > 1).collect(Collectors.toList());
+
+		Map<String,String[]> companyMap = parseCompanies(companies);
 		
 		Map<String, List<String[]>> map = list.stream().collect(Collectors.groupingBy(l -> l[0]));
 		List<Activity> collect = map.keySet().stream().map(k -> {
@@ -127,6 +128,12 @@ public class DataConverter {
 			obj.setEnd(cleanValue(line[9]));
 			obj.setAddress(cleanValue(line[10]));
 			obj.setCompany(cleanValue(line[11]));
+			if (companyMap.containsKey(obj.getCompany())) {
+				obj.setUrl(cleanValue(companyMap.get(obj.getCompany())[2]));
+				if (StringUtils.isEmpty(obj.getUrl())) obj.setUrl(null);
+				obj.setImage(cleanValue(companyMap.get(obj.getCompany())[1]));
+				if (StringUtils.isEmpty(obj.getImage())) obj.setImage(null);
+			}
 			String t = cleanValue(line[14]);
 			String d = cleanValue(line[15]);
 			if (t == null) t = "";
@@ -155,6 +162,17 @@ public class DataConverter {
 		return collect;
 	}
 	
+	/**
+	 * @param companies
+	 * @return
+	 * @throws IOException 
+	 */
+	private static Map<String, String[]> parseCompanies(String url) throws IOException {
+		List<String> lines = Files.readAllLines(Paths.get(url));
+		lines = lines.subList(1, lines.size());
+		return lines.stream().map(s -> s.split(";")).filter(l -> l.length > 1).collect(Collectors.toMap(l -> l[0], l -> l));
+
+	}
 	private static double[] getRandomLocation() {
 	    Random random = new Random();
 
@@ -264,11 +282,11 @@ public class DataConverter {
 		ObjectMapper mapper = new ObjectMapper();
 //		String convertPlans = mapper.writeValueAsString(convertPlans("./src/test/resources/data/ai4eu-plans_esco.csv"));
 //		Files.write(Paths.get("./src/main/resources/data/plans.json"), convertPlans.getBytes());
-//		String convertActivities = mapper.writeValueAsString(convertActivities("./src/test/resources/data/ai4eu-offer_activities_esco.csv"));
-//		Files.write(Paths.get("./src/main/resources/data/activities.json"), convertActivities.getBytes());
+		String convertActivities = mapper.writeValueAsString(convertActivities("./src/test/resources/data/ai4eu-offer_activities_esco.csv", "./src/test/resources/data/companies.csv"));
+		Files.write(Paths.get("./src/main/resources/data/activities.json"), convertActivities.getBytes());
 //		String convertCompetences = mapper.writeValueAsString(convertCompetences("./src/test/resources/data/competenza1.csv"));
 //		Files.write(Paths.get("./src/test/resources/data/competences.json"), convertCompetences.getBytes());
-		String converStudents = mapper.writeValueAsString(convertStudents("./src/test/resources/data/ai4eu-students_competences_esco.csv"));
-		Files.write(Paths.get("./src/main/resources/data/profiles.json"), converStudents.getBytes());
+//		String converStudents = mapper.writeValueAsString(convertStudents("./src/test/resources/data/ai4eu-students_competences_esco.csv"));
+//		Files.write(Paths.get("./src/main/resources/data/profiles.json"), converStudents.getBytes());
 	}
 }

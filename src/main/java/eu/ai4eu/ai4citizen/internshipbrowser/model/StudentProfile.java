@@ -29,6 +29,8 @@ public class StudentProfile {
 	@Id
 	private String studentId;
 	
+	private String refId;
+	
 	private String name, surname, fiscalCode;
 	private String address;
 	private Double latitute, longitude;
@@ -162,5 +164,17 @@ public class StudentProfile {
 	public String fullName() {
 		return surname +" " + name;
 	}
-	
+	/**
+	 * @return the refId
+	 */
+	public String getRefId() {
+		return refId;
+	}
+	/**
+	 * @param refId the refId to set
+	 */
+	public void setRefId(String refId) {
+		this.refId = refId;
+	}
+
 }
