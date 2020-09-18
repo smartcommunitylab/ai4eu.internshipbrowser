@@ -185,17 +185,13 @@ public class BrowserService {
 		ActivityCluster topicCluster = new ActivityCluster();
 		topicCluster.setAssignments(new LinkedList<>());
 		topicCluster.setType(CLUSTER.topic.toString());
-//		Map<String, List<Activity>> lists = offers.stream().collect(Collectors.groupingBy(a -> a.getCourse()));
-//		lists.keySet().forEach(key -> {
-//			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
-//			assignment.setKeys(Collections.singleton(key));
-//			assignment.setActivities(lists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
-//			topicCluster.getAssignments().add(assignment);
-//		});
-		ActivityClusterAssignment assignment = new ActivityClusterAssignment();
-		assignment.setKeys(Collections.singleton("test"));
-		assignment.setActivities(offers.stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
-		topicCluster.getAssignments().add(assignment);
+		Map<String, List<Activity>> lists = offers.stream().collect(Collectors.groupingBy(a -> a.getCourse()));
+		lists.keySet().forEach(key -> {
+			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
+			assignment.setKeys(Collections.singleton(key));
+			assignment.setActivities(lists.get(key).stream().map(a -> a.getActivityId()).collect(Collectors.toSet()));
+			topicCluster.getAssignments().add(assignment);
+		});
 		return topicCluster;
 	}
 	
