@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Internship Browser</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+
+  <style>
+    .RecastAppExpander {
+      bottom: 50px!important;
+    }
+  </style>
+
+  </head>
+  <body>
+    <div id="app">
+      <v-app>
+        <v-app-bar app>
+            <img src="./img/logo_ai4eu_beta.svg" height="30px" class="mr-6"/>
+            
+            <v-toolbar-title class="d-none d-sm-flex">Internship Browser</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <div>{{profile.name}} {{profile.surname}}</div>
+			      <v-btn icon @click="signOut()">
+			        <v-icon>mdi-location-exit</v-icon>
+			      </v-btn>
+			  </v-app-bar>
+
+        <v-main>
+			    <v-container fluid>
+			      <v-row justify="center">
+			        <v-col lg="6">
+				       <v-card tile>
+				         <v-card-title>My study profile</v-card-title>
+				         <v-card-text>
+				          <v-simple-table>
+				            <template>
+				              <tbody>
+                        <tr><th>Institute</th><td>{{profile.institute}}</td></tr>
+                        <tr><th>Course</th><td>{{profile.course}}</td></tr>
+                        <tr><th>Class</th><td>{{profile.courseClass}} ({{profile.courseYear}})</td></tr>
+                        <tr><th>Registration Year</th><td>{{profile.registrationYear}}</td></tr>
+                        <tr><th>Plan</th><td>{{profile.planTitle}}</td></tr>
+                      </tbody>
+                    </template>
+				          </v-simple-table>
+ 				         </v-card-text>
+				       </v-card>
+              </v-col>
+            </v-row>
+            <v-row justify="center">
+              <v-col lg="6">
+               <v-card tile>
+                 <v-card-title>My competences</v-card-title>
+                 <v-card-text>
+                  <v-simple-table>
+                    <template>
+                      <tbody>
+                        <tr v-for="c of profile.competences" :key="c.id"><td>{{c.description}} ({{c.source}})</td></tr>
+                      </tbody>
+                    </template>
+                  </v-simple-table>
+                 </v-card-text>
+               </v-card>
+              </v-col>
+            </v-row>
+            <v-row justify="center" >
+             <v-col lg="6">
+               <v-card tile>
+                 <v-card-title>Planned activities</v-card-title>
+                 <v-card-text>
+                  <div  v-for="a of profile.futureActivities" :key="a.type">
+                    <h3>{{a.type}} (Year {{a.registrationYear}})</h3>
+                    <div v-if="preferences[a.type+a.registrationYear]">
+                    <h4>Preferences</h4>
+	                  <v-simple-table>
+	                    <template>
+	                      <tbody>
+	                        <tr><th>Topic of interest</th><td>{{preferences[a.type+a.registrationYear].mytopic}}</td></tr>
+                          <tr><th>Type of company</th><td>{{preferences[a.type+a.registrationYear].mycompany}}</td></tr>
+                          <tr><th>City of interest</th><td>{{preferences[a.type+a.registrationYear].mycity}}</td></tr>
+                          <tr><th>Distance of interest</th><td>{{preferences[a.type+a.registrationYear].mylocation}}</td></tr>
+	                      </tbody>
+	                    </template>
+	                  </v-simple-table>
+                    <h4>Preferred internship offers</h4>
+                    <v-simple-table>
+                      <template>
+                        <tbody>
+                          <tr v-for="o of preferences[a.type+a.registrationYear].ilike" :key="o">
+                          <td><strong>{{o.company}}</strong><br>{{o.address}}<br><small>{{o.description}}</small></td></tr>
+                        </tbody>
+                      </template>
+                    </v-simple-table>
+	                  </div>
+                    <div v-if="!preferences[a.type+a.registrationYear]">
+                      <h2>No preferences defined! Use chatbot to express your preferences and improve the selection process!</h2>
+                    </div>
+                  </div>
+                 </v-card-text>
+               </v-card>
+              </v-col>              
+            </v-row>
+            <v-row justify="center">
+             <v-col lg="6">
+               <v-card tile>
+                 <v-card-title>Past activities</v-card-title>
+                 <v-card-text>
+                  <v-simple-table  v-if="profile.completeActivities && profile.completeActivities.length > 0">
+                    <template>
+                      <tbody>
+                        <tr v-for="a of profile.completeActivities" :key="a.type"><td>{{a.type}} (Year {{a.registrationYear}})</td></tr>
+                      </tbody>
+                    </template>
+                  </v-simple-table>
+                 </v-card-text>
+               </v-card>
+              </v-col>
+            </v-row>
+            
+			    </v-container>
+			  </v-main>
+			  <v-footer app>
+			    SmartCommunity Lab, FBK, AI4EU Project 2020 &copy; 
+			    <v-spacer></v-spacer>
+			    <small class="d-none d-md-flex">This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement 825619.</small>
+			  </v-footer>    
+      </v-app>
+    </div>      
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+	  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="./lib/oidc-client.min.js"></script>
+	  
+	  <script>
+	    acessToken = null;
+	    var mgr = new Oidc.UserManager({
+	        userStore: new Oidc.WebStorageStateStore(),  
+	        authority: 'https://aac.platform.smartcommunitylab.it/aac',
+	        client_id: '7175611b-cb56-4d76-b516-ee2df4461711',
+	        redirect_uri: window.location.origin + '/callback.html',
+	        response_type: 'token',
+	        scope: 'openid profile email',
+	        post_logout_redirect_uri: window.location.origin + '/',
+	        accessTokenExpiringNotificationTime: 10,
+	        automaticSilentRenew: false,
+	        filterProtocolClaims: true,
+	        loadUserInfo: true
+	      })
+	    let self = this;  	    
+
+	    new Vue({
+	      el: '#app',
+	      vuetify: new Vuetify(),
+	      data() {
+	    	  return {
+	    		  accessToken: null,
+	    		  profile: {},
+            preferences: {}
+	    	  }
+	      },
+	      created() {
+	    	  var self = this;
+          mgr.getUser().then(function (user) {
+              if (user == null) {
+                mgr.signinRedirect().catch(function (err) {
+                      console.log(err)
+                })
+              } else {
+                self.accessToken = user.access_token;
+                self.loadProfile();
+
+              }
+            }).catch(function (err) {
+              console.log(err)
+              mgr.signinRedirect().catch(function (err) {
+                  console.log(err)
+              })
+            });
+
+	      },
+	      methods: {
+	    	  loadProfile() {
+	    		  var self = this;
+	    		  axios.get('/api/user/me', {headers: {Authorization: 'Bearer ' + this.accessToken}})
+	    		  .then(function(profile) {
+	    			  self.profile = profile.data;
+              self.profile.futureActivities.forEach(function(a){
+                axios.get('/api/preferences/' + self.profile.studentId+'/'+a.type+'/'+a.registrationYear).then(function(prefs) {
+                  var pref = (prefs.data ? prefs.data.preferences : null);
+                  var key = a.type + a.registrationYear;
+                  if (pref.ilike && pref.ilike.length > 0) {
+                    var promises = [];
+                    pref.ilike.forEach(function(id) {
+                      promises.push(axios.get('/api/activities/'+id));
+                    });
+                    axios.all(promises).then(function(results) {
+                      pref.ilike = results.map(function(a) {return a.data});
+                      self.$set(self.preferences, key, pref);
+                      console.log(self.preferences);
+                    });
+                  }
+                });
+              });
+	    		  });
+	    	  },
+	    	  signOut () {    
+	    		    mgr.signoutRedirect().then(function (resp) {
+	    		      console.log('signed out', resp);
+	    		    }).catch(function (err) {
+	    		      console.log(err)
+	    		    })
+	    		  }
+	      }
+	    })
+	  </script>
+    
+    <script
+
+			src="https://cdn.cai.tools.sap/webchat/webchat.js"
+			
+			channelId="5ea9f0a6-53cd-4b15-94f1-ebc4d1c851d6"
+			
+			token="7f15f043bf5b7707baf7fc19af4803e6"
+			
+			id="cai-webchat">
+			
+</script>
+  </body>
+</html>
