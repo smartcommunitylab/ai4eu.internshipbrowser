@@ -75,30 +75,33 @@
                  <v-card-title>Planned activities</v-card-title>
                  <v-card-text>
                   <div  v-for="a of profile.futureActivities" :key="a.type">
-                    <h3>{{a.type}} (Year {{a.registrationYear}})</h3>
+                    <h2>{{a.type}} (Year {{a.registrationYear}})</h2>
                     <div v-if="preferences[a.type+a.registrationYear]">
-                    <h4>Preferences</h4>
+                    <br>
+                    <h3>My Preferences</h3> click <a @click="reset(a.type, a.registrationYear)">HERE</a> to reset
 	                  <v-simple-table>
 	                    <template>
 	                      <tbody>
-	                        <tr><th>Topic of interest</th><td>{{preferences[a.type+a.registrationYear].mytopic}}</td></tr>
-                          <tr><th>Type of company</th><td>{{preferences[a.type+a.registrationYear].mycompany}}</td></tr>
-                          <tr><th>City of interest</th><td>{{preferences[a.type+a.registrationYear].mycity}}</td></tr>
-                          <tr><th>Distance of interest</th><td>{{preferences[a.type+a.registrationYear].mylocation}}</td></tr>
+	                        <tr><th><img src="./img/mytopic.png" width="40px"></th><th>Topic of interest</th><td>{{preferences[a.type+a.registrationYear].mytopic}}</td></tr>
+                          <tr><th><img src="./img/mycompany.png" width="40px"></th><th>Type of company</th><td>{{preferences[a.type+a.registrationYear].mycompany}}</td></tr>
+                          <tr><th><img src="./img/mycity.png" width="40px"></th><th>City of interest</th><td>{{preferences[a.type+a.registrationYear].mycity}}</td></tr>
+                          <tr><th><img src="./img/mylocation.png" width="40px"></th><th>Distance of interest</th><td>{{preferences[a.type+a.registrationYear].mylocation}}</td></tr>
 	                      </tbody>
 	                    </template>
 	                  </v-simple-table>
-                    <h4>Preferred internship offers</h4>
+                    <br>
+                    <h3>Preferred offers</h3>
                     <v-simple-table>
                       <template>
                         <tbody>
-                          <tr v-for="o of preferences[a.type+a.registrationYear].ilike" :key="o">
+                          <tr v-for="o of preferences[a.type+a.registrationYear].ilike" :key="o.id">
                           <td><strong>{{o.company}}</strong><br>{{o.address}}<br><small>{{o.description}}</small></td></tr>
                         </tbody>
                       </template>
                     </v-simple-table>
 	                  </div>
                     <div v-if="!preferences[a.type+a.registrationYear]">
+                      <br>
                       <h2>No preferences defined! Use chatbot to express your preferences and improve the selection process!</h2>
                     </div>
                   </div>
@@ -217,7 +220,13 @@
 	    		    }).catch(function (err) {
 	    		      console.log(err)
 	    		    })
-	    		  }
+	    		  },
+            reset(type, year) {
+              var self = this;
+              axios.post('./api/preferences/' + self.profile.studentId+'/'+type+'/'+year+'/student', {}).then(function(res) {
+                self.$set(self.preferences, type + year, null);
+              });
+            }
 	      }
 	    })
 	  </script>
