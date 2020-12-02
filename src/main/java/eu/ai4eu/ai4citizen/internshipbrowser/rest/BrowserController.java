@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
@@ -93,6 +94,12 @@ public class BrowserController {
 		return ResponseEntity.ok(service.getVocabulary(cluster));
 	}
 	
+	@GetMapping("/api/activities")
+	@ApiOperation(value="Search activities")
+	public ResponseEntity<List<Activity>> searchActivities(@RequestParam(required = false) String q, @RequestParam(required = false) List<String> ids) {
+		return ResponseEntity.ok(service.searchActivite(q, ids));
+	}
+
 	@GetMapping("/api/activities/{activityId}")
 	@ApiOperation(value="Get activity details")
 	public ResponseEntity<Activity> getActivityDetails(@PathVariable String activityId) {

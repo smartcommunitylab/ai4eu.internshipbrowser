@@ -28,6 +28,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,9 +39,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityTemplate;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.Institute;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.AssignmentRepository;
+import eu.ai4eu.ai4citizen.internshipbrowser.repository.InstituteRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.OfferRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.PlanRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.StudentProfileRepository;
@@ -67,7 +71,18 @@ public class DataInitializer {
 	private OfferRepository offerRepo;
 	@Autowired
 	private AssignmentRepository assignRepo;
+	@Autowired
+	private InstituteRepository instituteRepo;
 
+	@PostConstruct
+	public void initInstitutes() throws Exception {
+		instituteRepo.deleteAll();
+		ObjectMapper mapper = new ObjectMapper();
+		Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/institutes.json")), Institute[].class))
+		.stream().forEach(a -> instituteRepo.save(a));
+
+	}
+	
 	public void initData() throws Exception {
 		
 		planRepo.deleteAll();
@@ -149,7 +164,7 @@ public class DataInitializer {
 		Arrays.asList(mapper.readValue(Files.readAllBytes(Paths.get(path+"/activities.json")), Activity[].class))
 				.stream().filter(a -> !a.isInternal()/* && a.getCompetences() != null && !a.getCompetences().isEmpty()*/).collect(Collectors.toList())
 				.forEach(a -> offerRepo.save(a));
-
+		
 	}
 
 	/**

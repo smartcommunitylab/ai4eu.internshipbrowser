@@ -41,10 +41,14 @@
 				          <v-simple-table>
 				            <template>
 				              <tbody>
-                        <tr><th>Institute</th><td>{{profile.institute}}</td></tr>
-                        <tr><th>Course</th><td>{{profile.course}}</td></tr>
+                        <tr><th>Institute</th><td>{{profile.institute}}<br>
+                          <small>{{profile.instituteAddress}} <a target="_blank" :href="'https://www.google.com/maps?q='+profile.instituteAddress">(map)</a></small>
+                        </td></tr>
+                        <tr><th>Course</th><td>{{profile.course}}
+                          <small v-if="profile.instituteReferent"><br>Reference person: {{profile.instituteReferent}}</small>
+                        </td></tr>
                         <tr><th>Class</th><td>{{profile.courseClass}} ({{profile.courseYear}})</td></tr>
-                        <tr><th>Registration Year</th><td>{{profile.registrationYear}}</td></tr>
+                        <tr><th>Registration Year</th><td>{{profile.registrationYear}} ({{profile.instituteHours[profile.registrationYear]}} Internship hours foreseen)</td></tr>
                         <tr><th>Plan</th><td>{{profile.planTitle}}</td></tr>
                       </tbody>
                     </template>
@@ -85,7 +89,7 @@
 	                        <tr><th><img src="./img/mytopic.png" width="40px"></th><th>Topic of interest</th><td>{{preferences[a.type+a.registrationYear].mytopic}}</td></tr>
                           <tr><th><img src="./img/mycompany.png" width="40px"></th><th>Type of company</th><td>{{preferences[a.type+a.registrationYear].mycompany}}</td></tr>
                           <tr><th><img src="./img/mycity.png" width="40px"></th><th>City of interest</th><td>{{preferences[a.type+a.registrationYear].mycity}}</td></tr>
-                          <tr><th><img src="./img/mylocation.png" width="40px"></th><th>Distance of interest</th><td>{{preferences[a.type+a.registrationYear].mylocation}}</td></tr>
+                          <!--tr><th><img src="./img/mylocation.png" width="40px"></th><th>Distance of interest</th><td>{{preferences[a.type+a.registrationYear].mylocation}}</td></tr-->
 	                      </tbody>
 	                    </template>
 	                  </v-simple-table>
@@ -95,7 +99,7 @@
                       <template>
                         <tbody>
                           <tr v-for="o of preferences[a.type+a.registrationYear].ilike" :key="o.id">
-                          <td><strong>{{o.company}}</strong><br>{{o.address}}<br><small>{{o.description}}</small></td></tr>
+                          <td><strong>{{o.company}}</strong><br>{{o.address.replace(' null', '')}}<br><small>{{o.description}}</small></td></tr>
                         </tbody>
                       </template>
                     </v-simple-table>
@@ -166,6 +170,7 @@
 	    	  return {
 	    		  accessToken: null,
 	    		  profile: {},
+            position: null,
             preferences: {}
 	    	  }
 	      },
@@ -195,6 +200,28 @@
 	    		  axios.get('./api/user/me', {headers: {Authorization: 'Bearer ' + this.accessToken}})
 	    		  .then(function(profile) {
 	    			  self.profile = profile.data;
+              
+              if (navigator.geolocation) {
+                try {
+                  navigator.geolocation.watchPosition(function(p) {
+                    self.position = [p.coords.latitude, p.coords.longitude];
+                  });                  
+                } catch(e) {
+                  console.error('position is not available');
+                  self.position = self.profile.instituteCoordinates;                  
+                }
+              } else {
+                self.position = self.profile.instituteCoordinates;
+              }
+              
+              window.webchatMethods = {
+                // called at each user message
+                getMemory: (conversationId) => {
+                  const memory = { student_name: self.profile.name + ' ' + self.profile.surname, student_id: self.profile.studentId, location: self.position.join(',') }
+                  return { memory, merge: true }
+                }
+              }
+              
               self.profile.futureActivities.forEach(function(a){
                 axios.get('./api/preferences/' + self.profile.studentId+'/'+a.type+'/'+a.registrationYear).then(function(prefs) {
                   var pref = (prefs.data ? prefs.data.preferences : null);
@@ -212,7 +239,13 @@
                   }
                 });
               });
-	    		  });
+	    		  })
+            .catch(function(err) {
+              if (err.response && err.response.status == 401) {
+                self.signOut();
+              }
+              console.log(err);
+            });
 	    	  },
 	    	  signOut () {    
 	    		    mgr.signoutRedirect().then(function (resp) {

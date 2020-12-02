@@ -15,8 +15,10 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.model;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 
@@ -36,6 +38,13 @@ public class StudentProfile {
 	private Double latitute, longitude;
 	
 	private String course, planTitle, planId, courseYear, institute, instituteId, courseClass;
+	
+	private String instituteReferent, instituteAddress;
+	private double[] instituteCoordinates;
+	
+	private Map<String, Integer> instituteHours = new HashMap<>();
+
+	
 	private Integer registrationYear;
 	
 	private List<Competence> competences;
@@ -175,6 +184,54 @@ public class StudentProfile {
 	 */
 	public void setRefId(String refId) {
 		this.refId = refId;
+	}
+	/**
+	 * @return the instituteReferent
+	 */
+	public String getInstituteReferent() {
+		return instituteReferent;
+	}
+	/**
+	 * @param instituteReferent the instituteReferent to set
+	 */
+	public void setInstituteReferent(String instituteReferent) {
+		this.instituteReferent = instituteReferent;
+	}
+	/**
+	 * @return the instituteAddress
+	 */
+	public String getInstituteAddress() {
+		return instituteAddress;
+	}
+	/**
+	 * @param instituteAddress the instituteAddress to set
+	 */
+	public void setInstituteAddress(String instituteAddress) {
+		this.instituteAddress = instituteAddress;
+	}
+	/**
+	 * @return the instituteCoordinates
+	 */
+	public double[] getInstituteCoordinates() {
+		return instituteCoordinates;
+	}
+	/**
+	 * @param instituteCoordinates the instituteCoordinates to set
+	 */
+	public void setInstituteCoordinates(double[] instituteCoordinates) {
+		this.instituteCoordinates = instituteCoordinates;
+	}
+	/**
+	 * @return the instituteHours
+	 */
+	public Map<String, Integer> getInstituteHours() {
+		return instituteHours;
+	}
+	/**
+	 * @param instituteHours the instituteHours to set
+	 */
+	public void setInstituteHours(Map<String, Integer> instituteHours) {
+		this.instituteHours = instituteHours;
 	}
 
 }

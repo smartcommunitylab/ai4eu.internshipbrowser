@@ -17,6 +17,7 @@ package eu.ai4eu.ai4citizen.internshipbrowser.service;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,11 +42,13 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityClustering.ActivityCl
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityClustering.ActivityClusterAssignment;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityTemplate;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityTemplate.CLUSTER;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.Institute;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentActivityPreference;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan.StudyActivity;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.AssignmentRepository;
+import eu.ai4eu.ai4citizen.internshipbrowser.repository.InstituteRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.OfferRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.PlanRepository;
 import eu.ai4eu.ai4citizen.internshipbrowser.repository.PreferenceRepository;
@@ -69,9 +74,19 @@ public class BrowserService {
 	private PreferenceRepository prefRepo;
 	@Autowired
 	private AssignmentRepository assignmentRepo;
+
+	@Autowired
+	private InstituteRepository instituteRepo;
+	
+	private static Map<String, Institute> institutes = new HashMap<>();
+	
+	@PostConstruct
+	public void initSchools() {
+		instituteRepo.findAll().forEach(i -> institutes.put(i.getInstituteId(), i));;
+	}
 	
 	public StudentProfile getProfile(String studentId) {
-		return profileRepo.findById(studentId).orElse(null);
+		return profileRepo.findById(studentId).map(p -> expandProfile(p)).orElse(null);
 	}
 
 	public Long getMatchingActivitiesCount(String studentId, String registrationYear, String activityType) {
@@ -336,7 +351,7 @@ public class BrowserService {
 	 * @return
 	 */
 	public List<StudentProfile> getProfiles() {
-		return profileRepo.findAll();
+		return profileRepo.findAll().stream().map(p -> expandProfile(p)).collect(Collectors.toList());
 	}
 
 
@@ -345,7 +360,7 @@ public class BrowserService {
 	 * @return
 	 */
 	public List<StudentProfile> getProfilesInInstitute(String instituteId) {
-		return profileRepo.findByInstituteId(instituteId);
+		return profileRepo.findByInstituteId(instituteId).stream().map(p -> expandProfile(p)).collect(Collectors.toList());
 	}
 
 	/**
@@ -354,7 +369,7 @@ public class BrowserService {
 	 * @return
 	 */
 	public List<StudentProfile> getProfilesInClass(String courseClass, String year) {
-		return profileRepo.findByCourseClassAndCourseYear(courseClass, year);
+		return profileRepo.findByCourseClassAndCourseYear(courseClass, year).stream().map(p -> expandProfile(p)).collect(Collectors.toList());
 	}
 
 	/**
@@ -372,5 +387,29 @@ public class BrowserService {
 	public List<ActivityAssignment> getActivityAssignments() {
 		return assignmentRepo.findAll();
 	}
+
+	/**
+	 * @param q
+	 * @param ids
+	 * @return
+	 */
+	public List<Activity> searchActivite(String q, List<String> ids) {
+		if (ids != null && !ids.isEmpty()) {
+			return offerRepo.findByActivityIdIn(ids);
+		} else if (!StringUtils.isEmpty(q)) {
+			return offerRepo.findByString(q);
+		}
+		return Collections.emptyList();
+	}
 	
+	public StudentProfile expandProfile(StudentProfile p) {
+		Institute i = institutes.get(p.getInstituteId());
+		if (i != null) {
+			p.setInstituteAddress(i.getAddress());
+			p.setInstituteCoordinates(i.getCoordinates());
+			p.setInstituteReferent(i.getReferent());
+			p.setInstituteHours(i.getHours());
+		}
+		return p;
+	}
 }

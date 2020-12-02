@@ -15,21 +15,14 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.repository;
 
-import java.util.List;
-
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 
-import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
+import eu.ai4eu.ai4citizen.internshipbrowser.model.Institute;
 
 /**
  * @author raman
  *
  */
-public interface OfferRepository extends MongoRepository<Activity, String> {
+public interface InstituteRepository  extends MongoRepository<Institute, String> {
 
-	List<Activity> findByActivityIdIn(List<String> ids);
-	
-	@Query("{company: {$regex: ?0, $options: 'i'}}")
-	List<Activity> findByString(String q);
 }
