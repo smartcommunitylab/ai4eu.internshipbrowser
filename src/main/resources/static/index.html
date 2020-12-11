@@ -65,7 +65,7 @@
                   <v-simple-table>
                     <template>
                       <tbody>
-                        <tr v-for="c of profile.competences" :key="c.id"><td>{{c.description}} ({{c.source}})</td></tr>
+                        <tr v-for="c of profile.competences" :key="c.id"><td>{{c.description || c.title}} ({{c.source || ('ESCO: ' + c.escoTitle)}})</td></tr>
                       </tbody>
                     </template>
                   </v-simple-table>
@@ -199,7 +199,18 @@
 	    		  var self = this;
 	    		  axios.get('./api/user/me', {headers: {Authorization: 'Bearer ' + this.accessToken}})
 	    		  .then(function(profile) {
-	    			  self.profile = profile.data;
+              if (profile.data.competences) {
+                var unique = [];
+                var uniqueComps = [];
+                profile.data.competences.forEach((c) => {
+                  if (unique.indexOf(c.id) < 0) {
+                    uniqueComps.push(c);
+                    unique.push(c.id);
+                  }
+                });  
+                profile.data.competences = uniqueComps;            
+              }
+              self.profile = profile.data;
               
               if (navigator.geolocation) {
                 try {
