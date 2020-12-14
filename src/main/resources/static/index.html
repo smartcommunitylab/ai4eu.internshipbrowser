@@ -36,20 +36,20 @@
 			      <v-row justify="center">
 			        <v-col lg="6">
 				       <v-card tile>
-				         <v-card-title>My study profile</v-card-title>
+				         <v-card-title>Il mio profilo di studio</v-card-title>
 				         <v-card-text>
 				          <v-simple-table>
 				            <template>
 				              <tbody>
-                        <tr><th>Institute</th><td>{{profile.institute}}<br>
+                        <tr><th>Istituto</th><td>{{profile.institute}}<br>
                           <small>{{profile.instituteAddress}} <a target="_blank" :href="'https://www.google.com/maps?q='+profile.instituteAddress">(map)</a></small>
                         </td></tr>
-                        <tr><th>Course</th><td>{{profile.course}}
+                        <tr><th>Corso</th><td>{{profile.course}}
                           <small v-if="profile.instituteReferent"><br>Reference person: {{profile.instituteReferent}}</small>
                         </td></tr>
-                        <tr><th>Class</th><td>{{profile.courseClass}} ({{profile.courseYear}})</td></tr>
-                        <tr><th>Registration Year</th><td>{{profile.registrationYear}} ({{profile.instituteHours[profile.registrationYear]}} Internship hours foreseen)</td></tr>
-                        <tr><th>Plan</th><td>{{profile.planTitle}}</td></tr>
+                        <tr><th>Classe</th><td>{{profile.courseClass}} ({{profile.courseYear}})</td></tr>
+                        <tr><th>Anno di corso</th><td>{{profile.registrationYear}} ({{profile.instituteHours[profile.registrationYear]}} ore previste)</td></tr>
+                        <tr><th>Piano di studio</th><td>{{profile.planTitle}}</td></tr>
                       </tbody>
                     </template>
 				          </v-simple-table>
@@ -60,7 +60,7 @@
             <v-row justify="center">
               <v-col lg="6">
                <v-card tile>
-                 <v-card-title>My competences</v-card-title>
+                 <v-card-title>Le mie competenze</v-card-title>
                  <v-card-text>
                   <v-simple-table>
                     <template>
@@ -76,25 +76,25 @@
             <v-row justify="center" >
              <v-col lg="6">
                <v-card tile>
-                 <v-card-title>Planned activities</v-card-title>
+                 <v-card-title>Attività pianificate</v-card-title>
                  <v-card-text>
                   <div  v-for="a of profile.futureActivities" :key="a.type">
-                    <h2>{{a.type}} (Year {{a.registrationYear}})</h2>
+                    <h2>{{a.type == 'internship' ? 'Tirocinio': a.type}} (Anno {{a.registrationYear}})</h2>
                     <div v-if="preferences[a.type+a.registrationYear]">
                     <br>
-                    <h3>My Preferences</h3> click <a @click="reset(a.type, a.registrationYear)">HERE</a> to reset
+                    <h3>Le mie preferenze</h3> clicca <a @click="reset(a.type, a.registrationYear)">QUI</a> per azzerare
 	                  <v-simple-table>
 	                    <template>
 	                      <tbody>
-	                        <tr><th><img src="./img/mytopic.png" width="40px"></th><th>Topic of interest</th><td>{{preferences[a.type+a.registrationYear].mytopic}}</td></tr>
-                          <tr><th><img src="./img/mycompany.png" width="40px"></th><th>Type of company</th><td>{{preferences[a.type+a.registrationYear].mycompany}}</td></tr>
-                          <tr><th><img src="./img/mycity.png" width="40px"></th><th>City of interest</th><td>{{preferences[a.type+a.registrationYear].mycity}}</td></tr>
+	                        <tr><th><img src="./img/mytopic.png" width="40px"></th><th>Temi di interesse</th><td>{{preferences[a.type+a.registrationYear].mytopic}}</td></tr>
+                          <tr><th><img src="./img/mycompany.png" width="40px"></th><th>Tipo di azienda</th><td>{{preferences[a.type+a.registrationYear].mycompany}}</td></tr>
+                          <tr><th><img src="./img/mycity.png" width="40px"></th><th>Città di interesse</th><td>{{preferences[a.type+a.registrationYear].mycity}}</td></tr>
                           <!--tr><th><img src="./img/mylocation.png" width="40px"></th><th>Distance of interest</th><td>{{preferences[a.type+a.registrationYear].mylocation}}</td></tr-->
 	                      </tbody>
 	                    </template>
 	                  </v-simple-table>
                     <br>
-                    <h3>Preferred offers</h3>
+                    <h3>Tirocini preferiti</h3>
                     <v-simple-table>
                       <template>
                         <tbody>
@@ -106,7 +106,7 @@
 	                  </div>
                     <div v-if="!preferences[a.type+a.registrationYear]">
                       <br>
-                      <h2>No preferences defined! Use chatbot to express your preferences and improve the selection process!</h2>
+                      <h2>Non ci sono preferenze definite! Usa il chatbot per esprimere le tue preferenze e  per miglorare il processo di selezionamento!</h2>
                     </div>
                   </div>
                  </v-card-text>
@@ -116,12 +116,12 @@
             <v-row justify="center">
              <v-col lg="6">
                <v-card tile>
-                 <v-card-title>Past activities</v-card-title>
+                 <v-card-title>Attività passate</v-card-title>
                  <v-card-text>
                   <v-simple-table  v-if="profile.completeActivities && profile.completeActivities.length > 0">
                     <template>
                       <tbody>
-                        <tr v-for="a of profile.completeActivities" :key="a.type"><td>{{a.type}} (Year {{a.registrationYear}})</td></tr>
+                        <tr v-for="a of profile.completeActivities" :key="a.type"><td>{{a.type == 'internship' ? 'Tirocinio': a.type}} (anno {{a.registrationYear}})</td></tr>
                       </tbody>
                     </template>
                   </v-simple-table>
@@ -228,7 +228,7 @@
               window.webchatMethods = {
                 // called at each user message
                 getMemory: (conversationId) => {
-                  const memory = { student_name: self.profile.name + ' ' + self.profile.surname, student_id: self.profile.studentId, location: self.position.join(',') }
+                  const memory = { student_name: self.profile.name + ' ' + self.profile.surname, student_id: self.profile.studentId, location: self.position.join(','), language: "it" }
                   return { memory, merge: true }
                 }
               }
@@ -276,15 +276,11 @@
 	  </script>
     
     <script
-
-			src="https://cdn.cai.tools.sap/webchat/webchat.js"
-			
-			channelId="5ea9f0a6-53cd-4b15-94f1-ebc4d1c851d6"
-			
-			token="7f15f043bf5b7707baf7fc19af4803e6"
-			
-			id="cai-webchat">
-			
-</script>
+      src="https://cdn.cai.tools.sap/webchat/webchat.js"
+      channelId="21137015-c813-4698-9e42-23cf13ee07da"
+      token="a69f1f2bb178ef39261a7ed9581f1456"
+      id="cai-webchat">
+      
+      </script>
   </body>
 </html>
