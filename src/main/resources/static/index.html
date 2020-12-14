@@ -32,7 +32,7 @@
 			  </v-app-bar>
 
         <v-main>
-			    <v-container fluid>
+			    <v-container fluid v-if="profile">
 			      <v-row justify="center">
 			        <v-col lg="6">
 				       <v-card tile>
@@ -48,7 +48,7 @@
                           <small v-if="profile.instituteReferent"><br>Reference person: {{profile.instituteReferent}}</small>
                         </td></tr>
                         <tr><th>Classe</th><td>{{profile.courseClass}} ({{profile.courseYear}})</td></tr>
-                        <tr><th>Anno di corso</th><td>{{profile.registrationYear}} ({{profile.instituteHours[profile.registrationYear]}} ore previste)</td></tr>
+                        <tr><th>Anno di corso</th><td>{{profile.registrationYear}} ({{(profile.instituteHours || {})[profile.registrationYear]}} ore previste)</td></tr>
                         <tr><th>Piano di studio</th><td>{{profile.planTitle}}</td></tr>
                       </tbody>
                     </template>
@@ -212,6 +212,7 @@
               }
               self.profile = profile.data;
               
+              self.position = self.profile.instituteCoordinates;
               if (navigator.geolocation) {
                 try {
                   navigator.geolocation.watchPosition(function(p) {
@@ -221,21 +222,20 @@
                   console.error('position is not available');
                   self.position = self.profile.instituteCoordinates;                  
                 }
-              } else {
-                self.position = self.profile.instituteCoordinates;
               }
               
               window.webchatMethods = {
                 // called at each user message
                 getMemory: (conversationId) => {
                   const memory = { student_name: self.profile.name + ' ' + self.profile.surname, student_id: self.profile.studentId, location: self.position.join(','), language: "it" }
+                  console.log(memory);
                   return { memory, merge: true }
                 }
               }
               
               self.profile.futureActivities.forEach(function(a){
                 axios.get('./api/preferences/' + self.profile.studentId+'/'+a.type+'/'+a.registrationYear).then(function(prefs) {
-                  var pref = (prefs.data ? prefs.data.preferences : null);
+                  var pref = (prefs.data && prefs.data.preferences ? prefs.data.preferences : {});
                   var key = a.type + a.registrationYear;
                   if (pref.ilike && pref.ilike.length > 0) {
                     var promises = [];
