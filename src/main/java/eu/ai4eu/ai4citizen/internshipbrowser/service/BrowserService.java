@@ -75,6 +75,10 @@ public class BrowserService {
 	@Autowired
 	private AssignmentRepository assignmentRepo;
 
+	private static final Set<String> privateBodies = new HashSet<>(Arrays.asList("s.r.l", " srl", " snc", "s.p.a", " spa", "responsabilit", " sas", "s.n.c", "studio"));
+	private static final Set<String> publicBodies = new HashSet<>(Arrays.asList("universit", "vigil", "fondazione", "istituto", "comune "));
+
+	
 	@Autowired
 	private InstituteRepository instituteRepo;
 	
@@ -103,11 +107,39 @@ public class BrowserService {
 		return offerRepo.findAll();
 	}
 
-	public ActivityClustering getMatchingActivities(String studentId, String registrationYear, String activityType) {
+	public ActivityClustering getMatchingActivities(
+			String studentId, 
+			String registrationYear, 
+			String activityType, 
+			String topic, 
+			String company, 
+			String city) {
 		final StudentProfile profile = getProfile(studentId);
 		List<Activity> offers = getAllActivities().stream()
-		.filter(a -> !a.isInternal() && a.getInstituteId().equals(profile.getInstituteId()) /*&& a.getCourse().equals(profile.getCourse()) */&& a.getRegistrationYear().equals(profile.getRegistrationYear()))
+		.filter(a -> {
+			if (!a.isInternal() && a.getInstituteId().equals(profile.getInstituteId()) /*&& a.getCourse().equals(profile.getCourse()) */&& a.getRegistrationYear().equals(profile.getRegistrationYear())) {
+				if (!StringUtils.isEmpty(topic)) {
+					if (!getActivityTopic(a).toLowerCase().contains(topic.toLowerCase())) {
+						return false;
+					}
+				}
+				if (!StringUtils.isEmpty(company)) {
+					if (!getActivityCompanyType(a).equalsIgnoreCase(company)) {
+						return false;
+					}
+				}
+				if (!StringUtils.isEmpty(city)) {
+					if (!extractCity(a.getAddress()).equalsIgnoreCase(company)) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+			return false;
+		})
 		.collect(Collectors.toList());
+		
 		
 		ActivityClustering clustering = new ActivityClustering();
 		clustering.setClusters(new LinkedList<>());
@@ -178,14 +210,9 @@ public class BrowserService {
 		ActivityCluster companyCluster = new ActivityCluster();
 		companyCluster.setAssignments(new LinkedList<>());
 		companyCluster.setType(CLUSTER.company.toString());
-		Set<String> privateBodies = new HashSet<>(Arrays.asList("s.r.l", " srl", " snc", "s.p.a", " spa", "responsabilit", " sas", "s.n.c", "studio"));
-		Set<String> publicBodies = new HashSet<>(Arrays.asList("universit", "vigil", "fondazione", "istituto", "comune "));
 		
 		Map<String, List<Activity>> companyLists = offers.stream().collect(Collectors.groupingBy(a -> {
-			String company = a.getCompany().toLowerCase();
-			if (privateBodies.stream().anyMatch(b -> company.contains(b))) return "private";
-			if (publicBodies.stream().anyMatch(b -> company.contains(b))) return "public";
-			return "other";
+			return getActivityCompanyType(a);
 		}));
 		companyLists.keySet().forEach(key -> {
 			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
@@ -196,11 +223,22 @@ public class BrowserService {
 		return companyCluster;
 	}
 
+	/**
+	 * @param a
+	 * @return
+	 */
+	private String getActivityCompanyType(Activity a) {
+		String company = a.getCompany().toLowerCase();
+		if (privateBodies.stream().anyMatch(b -> company.contains(b))) return "private";
+		if (publicBodies.stream().anyMatch(b -> company.contains(b))) return "public";
+		return "other";
+	}
+
 	private ActivityCluster extractTopics(List<Activity> offers) {
 		ActivityCluster topicCluster = new ActivityCluster();
 		topicCluster.setAssignments(new LinkedList<>());
 		topicCluster.setType(CLUSTER.topic.toString());
-		Map<String, List<Activity>> lists = offers.stream().collect(Collectors.groupingBy(a -> a.getCourse()));
+		Map<String, List<Activity>> lists = offers.stream().collect(Collectors.groupingBy(a -> getActivityTopic(a)));
 		lists.keySet().forEach(key -> {
 			ActivityClusterAssignment assignment = new ActivityClusterAssignment();
 			assignment.setKeys(Collections.singleton(key));
@@ -208,6 +246,14 @@ public class BrowserService {
 			topicCluster.getAssignments().add(assignment);
 		});
 		return topicCluster;
+	}
+
+	/**
+	 * @param a
+	 * @return
+	 */
+	private String getActivityTopic(Activity a) {
+		return a.getCourse();
 	}
 	
 	
@@ -295,7 +341,7 @@ public class BrowserService {
 		offer.setTeamSize(a.getTeamSize());
 		offer.setType(a.getType());
 		if (offer.isInternal()) {
-			offer.setCourse(a.getCourse());
+			offer.setCourse(getActivityTopic(a));
 			offer.setCourseYear(a.getCourseYear());
 			offer.setInstitute(a.getInstitute());
 			offer.setInstituteId(a.getInstituteId());
