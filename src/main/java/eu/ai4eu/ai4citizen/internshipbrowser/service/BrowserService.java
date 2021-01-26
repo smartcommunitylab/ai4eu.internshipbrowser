@@ -129,7 +129,7 @@ public class BrowserService {
 					}
 				}
 				if (!StringUtils.isEmpty(city)) {
-					if (!extractCity(a.getAddress()).equalsIgnoreCase(company)) {
+					if (!extractCity(a.getAddress()).toLowerCase().contains(city.toLowerCase())) {
 						return false;
 					}
 				}
