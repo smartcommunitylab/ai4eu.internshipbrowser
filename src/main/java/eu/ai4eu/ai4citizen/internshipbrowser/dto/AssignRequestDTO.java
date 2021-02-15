@@ -13,42 +13,58 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
-package eu.ai4eu.ai4citizen.internshipbrowser.model.gb;
 
-import java.util.Map;
+package eu.ai4eu.ai4citizen.internshipbrowser.dto;
 
 /**
  * @author raman
  *
  */
-public class Student {
+public class AssignRequestDTO {
 
-	private String id;
-//	private String name, school;
-	private Map<String, double[]> competences;
-	public String getId() {
-		return id;
+	private String institute, courseYear, courseClass;
+
+	/**
+	 * @return the institute
+	 */
+	public String getInstitute() {
+		return institute;
 	}
-	public void setId(String id) {
-		this.id = id;
+
+	/**
+	 * @param institute the institute to set
+	 */
+	public void setInstitute(String institute) {
+		this.institute = institute;
 	}
-//	public String getName() {
-//		return name;
-//	}
-//	public void setName(String name) {
-//		this.name = name;
-//	}
-//	public String getSchool() {
-//		return school;
-//	}
-//	public void setSchool(String school) {
-//		this.school = school;
-//	}
-	public Map<String, double[]> getCompetences() {
-		return competences;
+
+	/**
+	 * @return the courseYear
+	 */
+	public String getCourseYear() {
+		return courseYear;
 	}
-	public void setCompetences(Map<String, double[]> competences) {
-		this.competences = competences;
+
+	/**
+	 * @param courseYear the courseYear to set
+	 */
+	public void setCourseYear(String courseYear) {
+		this.courseYear = courseYear;
 	}
+
+	/**
+	 * @return the courseClass
+	 */
+	public String getCourseClass() {
+		return courseClass;
+	}
+
+	/**
+	 * @param courseClass the courseClass to set
+	 */
+	public void setCourseClass(String courseClass) {
+		this.courseClass = courseClass;
+	}
+	
+	
 }
-

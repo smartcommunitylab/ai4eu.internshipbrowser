@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import eu.ai4eu.ai4citizen.internshipbrowser.dto.AssignRequestDTO;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.Activity;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityAssignment;
 import eu.ai4eu.ai4citizen.internshipbrowser.model.ActivityClustering;
@@ -70,10 +71,10 @@ public class BrowserController {
 	public ResponseEntity<List<StudentProfile>> getProfilesInInstitute(@PathVariable String instituteId) {
 		return ResponseEntity.ok(service.getProfilesInInstitute(instituteId));
 	}
-	@GetMapping("/api/profile/courseClass/{year}/{courseClass:.*}")
-	@ApiOperation(value="Get student profiles of a class")
-	public ResponseEntity<List<StudentProfile>> getProfilesInCourseClass(@PathVariable String year, @PathVariable String courseClass) {
-		return ResponseEntity.ok(service.getProfilesInClass(courseClass, year));
+	@GetMapping("/api/profile/institute/{instituteId}/{courseYear}/{courseClass}")
+	@ApiOperation(value="Get student profiles of an institute, year, and class")
+	public ResponseEntity<List<StudentProfile>> getProfilesInInstituteClass(@PathVariable String instituteId, @PathVariable String courseClass, @PathVariable String courseYear) {
+		return ResponseEntity.ok(service.getProfilesInInstitute(instituteId, courseYear, courseClass));
 	}
 
 	@GetMapping("/api/activities/{studentId}/{activityType}/{registrationYear}")
@@ -104,7 +105,7 @@ public class BrowserController {
 	@GetMapping("/api/activities")
 	@ApiOperation(value="Search activities")
 	public ResponseEntity<List<Activity>> searchActivities(@RequestParam(required = false) String q, @RequestParam(required = false) List<String> ids) {
-		return ResponseEntity.ok(service.searchActivite(q, ids));
+		return ResponseEntity.ok(service.searchActivities(q, ids));
 	}
 
 	@GetMapping("/api/activities/{activityId}")
@@ -131,6 +132,13 @@ public class BrowserController {
 		return ResponseEntity.ok(service.getActivityAssignments());
 	}
 
+	@GetMapping("/api/activityassignment/institute/{instituteId}/{courseYear}/{courseClass}")
+	@ApiOperation(value="Get activity assignments of an institute, year, and class")
+	public ResponseEntity<List<ActivityAssignment>> getActivityAssignmentsInInstituteClass(@PathVariable String instituteId, @PathVariable String courseClass, @PathVariable String courseYear) {
+		return ResponseEntity.ok(service.getActivityAssignments(instituteId, courseYear, courseClass));
+	}
+
+	
 	@GetMapping("/api/activityassignment/student/{studentId:.*}")
 	@ApiOperation(value="Get student assignment")
 	public ResponseEntity<ActivityAssignment> getActivityAssignmentForStudent(@PathVariable String studentId) {
@@ -142,7 +150,13 @@ public class BrowserController {
 	public ResponseEntity<StudentActivityPreference> getActivityPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType) {
 		return ResponseEntity.ok(service.getActivityPreference(studentId, registrationYear, activityType));
 	}
-	
+
+	@GetMapping("/api/preferences/institute/{instituteId}/{courseYear}/{courseClass}/{activityType}")
+	@ApiOperation(value="Get activity preferences of an institute, year, and class")
+	public ResponseEntity<List<StudentActivityPreference>> getActivityPreferencesInInstituteClass(@PathVariable String instituteId, @PathVariable String courseClass, @PathVariable String courseYear, @PathVariable String activityType) {
+		return ResponseEntity.ok(service.getActivityPreferences(instituteId, courseYear, courseClass, activityType));
+	}
+
 	@PostMapping("/api/preferences/{studentId}/{activityType}/{registrationYear}/student")
 	@ApiOperation(value="Update student activity preferences")
 	public ResponseEntity<StudentActivityPreference> saveActivityPreference(@PathVariable String studentId, @PathVariable String registrationYear, @PathVariable String activityType, @RequestBody Map<String, Object> preferences) {
@@ -155,10 +169,10 @@ public class BrowserController {
 		return ResponseEntity.ok(service.saveActivityTeacherPreference(studentId, registrationYear, activityType, preferences));
 	}
 
-	@PostMapping("/api/assign/{year}/{courseClass:.*}")
+	@PostMapping("/api/assign")
 	@ApiOperation(value="Trigger group building algorithm for a class")
-	public ResponseEntity<Void> assignClass(@PathVariable String year, @PathVariable String courseClass) throws Exception {
-		groupBuilder.buildClass(courseClass, year);
+	public ResponseEntity<Void> assignClass(@RequestBody AssignRequestDTO body) throws Exception {
+		groupBuilder.buildClass(body.getInstitute(), body.getCourseClass(), body.getCourseYear());
 		return ResponseEntity.ok().build();
 	}
 

@@ -281,7 +281,7 @@ public class BrowserService {
 	}
 
 	public StudentActivityPreference getActivityPreference(String studentId, String registrationYear, String activityType) {
-		StudentActivityPreference stored = prefRepo.findByStudentIdAndRegistrationYearAndActivityType(studentId, Integer.parseInt(registrationYear), ActivityTemplate.TYPE_INTERNSHIP);
+		StudentActivityPreference stored = prefRepo.findByStudentIdAndRegistrationYearAndActivityType(studentId, Integer.parseInt(registrationYear), activityType);
 		if (stored == null) {
 			stored = new StudentActivityPreference();
 			stored.setStudentId(studentId);
@@ -300,6 +300,24 @@ public class BrowserService {
 		}
 		return stored;
 	}
+	
+
+	/**
+	 * @param instituteId
+	 * @param courseYear
+	 * @param courseClass
+	 * @param activityType
+	 * @return
+	 */
+	public List<StudentActivityPreference> getActivityPreferences(String instituteId, String courseYear, String courseClass, String activityType) {
+		List<StudentActivityPreference> res = new LinkedList<>();
+		List<StudentProfile> students = profileRepo.findByInstituteIdAndCourseClassAndCourseYear(instituteId, courseClass, courseYear);
+		students.forEach(s -> {
+			res.add(getActivityPreference(s.getStudentId(), s.getRegistrationYear().toString(), activityType));
+		});
+		return res;
+	}
+
 	
 	public StudentActivityPreference saveActivityPreference(String studentId, String registrationYear, String activityType, Map<String, Object> preferences) {
 		StudentActivityPreference pref = getActivityPreference(studentId, registrationYear, activityType);
@@ -348,7 +366,15 @@ public class BrowserService {
 			offer.setPlanId(a.getPlanId());
 			offer.setPlanTitle(a.getPlanTitle());
 		}
+		updateMappings(offer);
 		return offer;
+	}
+	
+	private void updateMappings(Activity a) {
+		a.setMapping(new HashMap<>());
+		a.getMapping().put("city", extractCity(a.getAddress()));
+		a.getMapping().put("topic", getActivityTopic(a));
+		a.getMapping().put("company", getActivityCompanyType(a));
 	}
 	
 	/**
@@ -408,14 +434,16 @@ public class BrowserService {
 	public List<StudentProfile> getProfilesInInstitute(String instituteId) {
 		return profileRepo.findByInstituteId(instituteId).stream().map(p -> expandProfile(p)).collect(Collectors.toList());
 	}
+	
 
 	/**
+	 * @param instituteId
+	 * @param courseYear
 	 * @param courseClass
-	 * @param year 
 	 * @return
 	 */
-	public List<StudentProfile> getProfilesInClass(String courseClass, String year) {
-		return profileRepo.findByCourseClassAndCourseYear(courseClass, year).stream().map(p -> expandProfile(p)).collect(Collectors.toList());
+	public List<StudentProfile> getProfilesInInstitute(String instituteId, String courseYear, String courseClass) {
+		return profileRepo.findByInstituteIdAndCourseClassAndCourseYear(instituteId, courseClass, courseYear).stream().map(p -> expandProfile(p)).collect(Collectors.toList());
 	}
 
 	/**
@@ -435,15 +463,32 @@ public class BrowserService {
 	}
 
 	/**
+	 * @param instituteId
+	 * @param courseYear
+	 * @param courseClass
+	 * @return
+	 */
+	public List<ActivityAssignment> getActivityAssignments(String instituteId, String courseYear, String courseClass) {
+		Set<String> set = profileRepo.findByInstituteIdAndCourseClassAndCourseYear(instituteId, courseClass, courseYear).stream().map(s -> s.getStudentId()).collect(Collectors.toSet());
+		return assignmentRepo.findByStudentIdIn(set);
+	}
+	
+	/**
 	 * @param q
 	 * @param ids
 	 * @return
 	 */
-	public List<Activity> searchActivite(String q, List<String> ids) {
+	public List<Activity> searchActivities(String q, List<String> ids) {
 		if (ids != null && !ids.isEmpty()) {
-			return offerRepo.findByActivityIdIn(ids);
+			return offerRepo.findByActivityIdIn(ids).stream().map(a -> {
+				updateMappings(a);
+				return a;
+			}).collect(Collectors.toList());
 		} else if (!StringUtils.isEmpty(q)) {
-			return offerRepo.findByString(q);
+			return offerRepo.findByString(q).stream().map(a -> {
+				updateMappings(a);
+				return a;
+			}).collect(Collectors.toList());
 		}
 		return Collections.emptyList();
 	}
@@ -458,4 +503,6 @@ public class BrowserService {
 		}
 		return p;
 	}
+
+
 }

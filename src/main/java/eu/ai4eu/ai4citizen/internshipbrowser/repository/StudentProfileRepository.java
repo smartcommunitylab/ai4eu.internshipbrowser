@@ -28,6 +28,6 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.StudentProfile;
 public interface StudentProfileRepository  extends MongoRepository<StudentProfile, String> {
 
 	List<StudentProfile> findByInstituteId(String instituteId);
-	List<StudentProfile> findByCourseClassAndCourseYear(String courseClass, String courseYear);
+	List<StudentProfile> findByInstituteIdAndCourseClassAndCourseYear(String instituteId, String courseClass, String courseYear);
 
 }

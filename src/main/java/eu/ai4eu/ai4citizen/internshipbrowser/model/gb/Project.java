@@ -15,7 +15,6 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.model.gb;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +25,7 @@ public class Project {
 
 	private String id;
 	private String institute, description;
-	private Integer teamsize;
+	private Integer size;
 	private Boolean interview;
 	private Map<String, Double[]> competences;
 
@@ -48,11 +47,17 @@ public class Project {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public Integer getTeamsize() {
-		return teamsize;
+	/**
+	 * @return the size
+	 */
+	public Integer getSize() {
+		return size;
 	}
-	public void setTeamsize(Integer teamsize) {
-		this.teamsize = teamsize;
+	/**
+	 * @param size the size to set
+	 */
+	public void setSize(Integer size) {
+		this.size = size;
 	}
 	public Boolean getInterview() {
 		return interview;

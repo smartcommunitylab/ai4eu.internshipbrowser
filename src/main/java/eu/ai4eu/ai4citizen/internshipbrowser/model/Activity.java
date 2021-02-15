@@ -15,6 +15,8 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.model;
 
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -38,6 +40,8 @@ public class Activity extends ActivityTemplate {
 	private String url, image;
 	
 	private Integer teamSize;
+	
+	private Map<String, Object> mapping;
 	
 	public String getActivityId() {
 		return activityId;
@@ -117,4 +121,18 @@ public class Activity extends ActivityTemplate {
 	public void setImage(String image) {
 		this.image = image;
 	}
+	/**
+	 * @return the mapping
+	 */
+	public Map<String, Object> getMapping() {
+		return mapping;
+	}
+	/**
+	 * @param mapping the mapping to set
+	 */
+	public void setMapping(Map<String, Object> mapping) {
+		this.mapping = mapping;
+	}
+	
+	
 }

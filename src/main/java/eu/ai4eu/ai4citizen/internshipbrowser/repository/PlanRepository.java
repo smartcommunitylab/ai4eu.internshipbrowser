@@ -15,6 +15,8 @@
  ******************************************************************************/
 package eu.ai4eu.ai4citizen.internshipbrowser.repository;
 
+import java.util.List;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
@@ -25,4 +27,5 @@ import eu.ai4eu.ai4citizen.internshipbrowser.model.StudyPlan;
  */
 public interface PlanRepository  extends MongoRepository<StudyPlan, String> {
 
+	List<StudyPlan> findByInstituteIdAndCourse(String instituteId, String course);
 }
