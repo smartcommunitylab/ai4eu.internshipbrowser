@@ -345,6 +345,8 @@ public class BrowserService {
 	
 	private Activity toOffer(Activity a) {
 		Activity offer = new Activity();
+		updateMappings(a);
+
 		offer.setAddress(a.getAddress());
 		offer.setCompany(a.getCompany());
 		offer.setCompetences(a.getCompetences());
@@ -359,14 +361,14 @@ public class BrowserService {
 		offer.setTeamSize(a.getTeamSize());
 		offer.setType(a.getType());
 		if (offer.isInternal()) {
-			offer.setCourse(getActivityTopic(a));
+			offer.setCourse(a.getCourse());
 			offer.setCourseYear(a.getCourseYear());
 			offer.setInstitute(a.getInstitute());
 			offer.setInstituteId(a.getInstituteId());
 			offer.setPlanId(a.getPlanId());
 			offer.setPlanTitle(a.getPlanTitle());
 		}
-		updateMappings(offer);
+		offer.setMapping(a.getMapping());
 		return offer;
 	}
 	
